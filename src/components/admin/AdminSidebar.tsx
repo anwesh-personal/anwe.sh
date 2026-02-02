@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { ThemeSwitcherCompact } from './ThemeSwitcher';
+import { useAuth } from '@/components/AuthProvider';
+import type { User } from '@supabase/supabase-js';
 
 const navItems = [
     {
@@ -65,8 +67,13 @@ const navItems = [
     },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+    user?: User | null;
+}
+
+export function AdminSidebar({ user }: AdminSidebarProps) {
     const pathname = usePathname();
+    const { signOut } = useAuth();
 
     const isActive = (href: string) => {
         if (href === '/admin') {
@@ -74,6 +81,9 @@ export function AdminSidebar() {
         }
         return pathname.startsWith(href);
     };
+
+    const userEmail = user?.email || 'admin@anwe.sh';
+    const userInitials = userEmail.slice(0, 2).toUpperCase();
 
     return (
         <aside className="admin-sidebar">
@@ -104,10 +114,28 @@ export function AdminSidebar() {
             </nav>
 
             <div className="sidebar-footer">
-                <ThemeSwitcherCompact />
-                <Link href="/" className="sidebar-back-link">
-                    ← Back to Site
-                </Link>
+                {/* User Profile */}
+                <div className="sidebar-user">
+                    <div className="sidebar-user-avatar">
+                        {userInitials}
+                    </div>
+                    <div className="sidebar-user-info">
+                        <span className="sidebar-user-email">{userEmail}</span>
+                        <button
+                            onClick={signOut}
+                            className="sidebar-logout-btn"
+                        >
+                            Sign out
+                        </button>
+                    </div>
+                </div>
+
+                <div className="sidebar-footer-row">
+                    <ThemeSwitcherCompact />
+                    <Link href="/" className="sidebar-back-link">
+                        ← Site
+                    </Link>
+                </div>
             </div>
         </aside>
     );

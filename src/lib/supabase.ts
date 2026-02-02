@@ -1,11 +1,80 @@
 import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Server-side client (for API routes and server components)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Types
+// Browser client (for client components)
+export function createClientComponentClient() {
+    return createBrowserClient(supabaseUrl, supabaseAnonKey);
+}
+
+// =====================================================
+// AUTH FUNCTIONS
+// =====================================================
+
+// Sign in with email/password
+export async function signIn(email: string, password: string) {
+    const client = createClientComponentClient();
+    const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        console.error('Sign in error:', error);
+        return { user: null, error: error.message };
+    }
+
+    return { user: data.user, error: null };
+}
+
+// Sign out
+export async function signOut() {
+    const client = createClientComponentClient();
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+        console.error('Sign out error:', error);
+        return { error: error.message };
+    }
+
+    return { error: null };
+}
+
+// Get current session
+export async function getSession() {
+    const client = createClientComponentClient();
+    const { data: { session }, error } = await client.auth.getSession();
+
+    if (error) {
+        console.error('Session error:', error);
+        return null;
+    }
+
+    return session;
+}
+
+// Get current user
+export async function getCurrentUser() {
+    const client = createClientComponentClient();
+    const { data: { user }, error } = await client.auth.getUser();
+
+    if (error) {
+        console.error('Get user error:', error);
+        return null;
+    }
+
+    return user;
+}
+
+// =====================================================
+// TYPES
+// =====================================================
+
 export interface BlogPost {
     id: string;
     title: string;
@@ -30,6 +99,10 @@ export interface BlogPost {
     created_at: string;
     updated_at: string;
 }
+
+// =====================================================
+// BLOG FUNCTIONS (PUBLIC)
+// =====================================================
 
 // Fetch all published posts
 export async function getAllPosts(): Promise<BlogPost[]> {
@@ -99,7 +172,7 @@ export async function getFeaturedPosts(): Promise<BlogPost[]> {
 }
 
 // =====================================================
-// ADMIN FUNCTIONS (require service role in production)
+// ADMIN FUNCTIONS (require auth)
 // =====================================================
 
 // Get ALL posts (including drafts) for admin
