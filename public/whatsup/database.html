@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema - ANWE.SH</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            margin: 2rem 0 1rem;
+            color: var(--accent-2);
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        code {
+            background: var(--surface-2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-2);
+        }
+
+        pre {
+            background: var(--surface-2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--text-muted);
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .type-uuid {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .type-text {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .type-bool {
+            background: #8b5cf6;
+            color: #fff;
+        }
+
+        .type-timestamp {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .type-array {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .type-int {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .pk {
+            color: #fbbf24;
+        }
+
+        .fk {
+            color: #60a5fa;
+        }
+
+        .nullable {
+            color: #888;
+            font-style: italic;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: var(--accent-1);
+            color: #000;
+            border-color: var(--accent-1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .rls-policy {
+            background: var(--surface-2);
+            border-left: 3px solid var(--accent-1);
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .rls-policy h5 {
+            color: var(--accent-2);
+            margin-bottom: 0.25rem;
+        }
+
+        .rls-policy p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>🗄️ Database Schema</h1>
+        <p class="subtitle">Complete database structure, tables, relationships, and Row Level Security policies</p>
+
+        <div class="section">
+            <h2>📊 Entity Relationship Diagram</h2>
+
+            <div class="mermaid">
+                erDiagram
+                USERS ||--o{ BLOG_POSTS : creates
+                USERS ||--o{ SESSIONS : has
+                USERS ||--o{ AGENT_LOGS : triggers
+
+                BLOG_POSTS ||--o{ POST_TAGS : has
+                BLOG_POSTS ||--o{ ANALYTICS_EVENTS : generates
+                BLOG_POSTS ||--o{ COMMENTS : receives
+
+                TAGS ||--o{ POST_TAGS : belongs_to
+
+                AGENTS ||--o{ AGENT_LOGS : produces
+                AGENTS ||--o{ AGENT_CONFIGS : has
+
+                USERS {
+                uuid id PK
+                text email
+                text password_hash
+                text name
+                text role
+                timestamp created_at
+                timestamp last_login
+                }
+
+                BLOG_POSTS {
+                uuid id PK
+                text title
+                text slug UK
+                text excerpt
+                text content
+                text cover_image
+                text category
+                text[] tags
+                text reading_time
+                int word_count
+                bool published
+                timestamp published_at
+                bool featured
+                text source
+                text source_agent
+                uuid author_id FK
+                timestamp created_at
+                timestamp updated_at
+                }
+
+                TAGS {
+                uuid id PK
+                text name UK
+                text slug UK
+                int post_count
+                }
+
+                POST_TAGS {
+                uuid post_id FK
+                uuid tag_id FK
+                }
+
+                AGENTS {
+                uuid id PK
+                text name UK
+                text type
+                text description
+                bool active
+                jsonb config
+                timestamp last_run
+                }
+
+                AGENT_LOGS {
+                uuid id PK
+                uuid agent_id FK
+                uuid triggered_by FK
+                text action
+                text status
+                jsonb input
+                jsonb output
+                int duration_ms
+                timestamp created_at
+                }
+
+                ANALYTICS_EVENTS {
+                uuid id PK
+                uuid post_id FK
+                text event_type
+                text page_path
+                text referrer
+                text user_agent
+                text country
+                jsonb metadata
+                timestamp created_at
+                }
+
+                COMMENTS {
+                uuid id PK
+                uuid post_id FK
+                text author_name
+                text author_email
+                text content
+                bool approved
+                uuid parent_id FK
+                timestamp created_at
+                }
+
+                SESSIONS {
+                uuid id PK
+                uuid user_id FK
+                text token
+                timestamp expires_at
+                timestamp created_at
+                }
+
+                AGENT_CONFIGS {
+                uuid id PK
+                uuid agent_id FK
+                text key
+                jsonb value
+                timestamp updated_at
+                }
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Table Definitions</h2>
+
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('blog_posts')">blog_posts</div>
+                <div class="tab" onclick="showTab('users')">users</div>
+                <div class="tab" onclick="showTab('agents')">agents</div>
+                <div class="tab" onclick="showTab('agent_logs')">agent_logs</div>
+                <div class="tab" onclick="showTab('analytics')">analytics_events</div>
+                <div class="tab" onclick="showTab('comments')">comments</div>
+            </div>
+
+            <!-- blog_posts -->
+            <div id="blog_posts" class="tab-content active">
+                <h3>blog_posts</h3>
+                <p>Stores all blog posts, both published and drafts. Supports AI-generated content tracking.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY, DEFAULT uuid_generate_v4()</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td>title</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Post title</td>
+                        </tr>
+                        <tr>
+                            <td>slug</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL, UNIQUE</td>
+                            <td>URL-friendly identifier</td>
+                        </tr>
+                        <tr>
+                            <td>excerpt</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Short summary for cards</td>
+                        </tr>
+                        <tr>
+                            <td>content</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Full post content (Markdown)</td>
+                        </tr>
+                        <tr>
+                            <td>cover_image</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>URL to cover image</td>
+                        </tr>
+                        <tr>
+                            <td>category</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL, DEFAULT 'General'</td>
+                            <td>Post category</td>
+                        </tr>
+                        <tr>
+                            <td>tags</td>
+                            <td><span class="type-badge type-array">TEXT[]</span></td>
+                            <td>DEFAULT '{}'</td>
+                            <td>Array of tag strings</td>
+                        </tr>
+                        <tr>
+                            <td>reading_time</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Estimated read time (e.g., "5 min")</td>
+                        </tr>
+                        <tr>
+                            <td>word_count</td>
+                            <td><span class="type-badge type-int">INTEGER</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Total word count</td>
+                        </tr>
+                        <tr>
+                            <td>published</td>
+                            <td><span class="type-badge type-bool">BOOLEAN</span></td>
+                            <td>DEFAULT FALSE</td>
+                            <td>Is post visible?</td>
+                        </tr>
+                        <tr>
+                            <td>published_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>When post went live</td>
+                        </tr>
+                        <tr>
+                            <td>featured</td>
+                            <td><span class="type-badge type-bool">BOOLEAN</span></td>
+                            <td>DEFAULT FALSE</td>
+                            <td>Show in featured section?</td>
+                        </tr>
+                        <tr>
+                            <td>meta_title</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>SEO title override</td>
+                        </tr>
+                        <tr>
+                            <td>meta_description</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>SEO description</td>
+                        </tr>
+                        <tr>
+                            <td>author_name</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>DEFAULT 'Anwesh Rath'</td>
+                            <td>Display author name</td>
+                        </tr>
+                        <tr>
+                            <td>source</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>DEFAULT 'manual'</td>
+                            <td>'manual', 'ora', 'agent'</td>
+                        </tr>
+                        <tr>
+                            <td>source_agent</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Which agent created it</td>
+                        </tr>
+                        <tr>
+                            <td>source_prompt</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Original AI prompt</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Record creation time</td>
+                        </tr>
+                        <tr>
+                            <td>updated_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Last modification time</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 2rem; color: var(--accent-2);">Indexes</h4>
+                <pre>
+CREATE INDEX idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX idx_blog_posts_published ON blog_posts(published, published_at DESC);
+CREATE INDEX idx_blog_posts_category ON blog_posts(category);
+CREATE INDEX idx_blog_posts_featured ON blog_posts(featured) WHERE featured = TRUE;</pre>
+
+                <h4 style="margin-top: 2rem; color: var(--accent-2);">Row Level Security</h4>
+                <div class="rls-policy">
+                    <h5>Public can read published posts</h5>
+                    <p><code>SELECT</code> where <code>published = TRUE</code></p>
+                </div>
+                <div class="rls-policy">
+                    <h5>Service role has full access</h5>
+                    <p><code>ALL</code> where <code>auth.role() = 'service_role'</code></p>
+                </div>
+            </div>
+
+            <!-- users -->
+            <div id="users" class="tab-content">
+                <h3>users</h3>
+                <p>Admin users who can access the dashboard and manage content.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL, UNIQUE</td>
+                            <td>Login email</td>
+                        </tr>
+                        <tr>
+                            <td>password_hash</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Bcrypt hashed password</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Display name</td>
+                        </tr>
+                        <tr>
+                            <td>role</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>DEFAULT 'admin'</td>
+                            <td>'superadmin', 'admin', 'editor'</td>
+                        </tr>
+                        <tr>
+                            <td>avatar_url</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Profile picture URL</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Account creation</td>
+                        </tr>
+                        <tr>
+                            <td>last_login</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Last login time</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- agents -->
+            <div id="agents" class="tab-content">
+                <h3>agents</h3>
+                <p>Registry of all AI agents in the system.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL, UNIQUE</td>
+                            <td>Agent name (e.g., 'writer')</td>
+                        </tr>
+                        <tr>
+                            <td>type</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>'content', 'image', 'seo', 'social'</td>
+                        </tr>
+                        <tr>
+                            <td>description</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>What this agent does</td>
+                        </tr>
+                        <tr>
+                            <td>active</td>
+                            <td><span class="type-badge type-bool">BOOLEAN</span></td>
+                            <td>DEFAULT TRUE</td>
+                            <td>Is agent enabled?</td>
+                        </tr>
+                        <tr>
+                            <td>config</td>
+                            <td><span class="type-badge type-text">JSONB</span></td>
+                            <td>DEFAULT '{}'</td>
+                            <td>Agent configuration</td>
+                        </tr>
+                        <tr>
+                            <td>model</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>AI model used (gpt-4, claude-3)</td>
+                        </tr>
+                        <tr>
+                            <td>last_run</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Last execution time</td>
+                        </tr>
+                        <tr>
+                            <td>run_count</td>
+                            <td><span class="type-badge type-int">INTEGER</span></td>
+                            <td>DEFAULT 0</td>
+                            <td>Total executions</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Registration time</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 2rem; color: var(--accent-2);">Initial Agents</h4>
+                <pre>
+INSERT INTO agents (name, type, description, model) VALUES
+('ora', 'orchestrator', 'Main AI brain that coordinates all other agents', 'gpt-4'),
+('writer', 'content', 'Generates blog posts and articles', 'claude-3-opus'),
+('imager', 'image', 'Creates cover images and visuals', 'dall-e-3'),
+('seo', 'seo', 'Optimizes content for search engines', 'gpt-4-turbo'),
+('social', 'social', 'Creates social media posts', 'gpt-4-turbo');</pre>
+            </div>
+
+            <!-- agent_logs -->
+            <div id="agent_logs" class="tab-content">
+                <h3>agent_logs</h3>
+                <p>Audit trail of all agent executions.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fk">agent_id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>REFERENCES agents(id)</td>
+                            <td>Which agent ran</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fk">triggered_by</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>REFERENCES users(id)</td>
+                            <td>Who triggered it</td>
+                        </tr>
+                        <tr>
+                            <td>trigger_type</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>'manual', 'scheduled', 'webhook', 'agent'</td>
+                        </tr>
+                        <tr>
+                            <td>action</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>What action was performed</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>'pending', 'running', 'success', 'failed'</td>
+                        </tr>
+                        <tr>
+                            <td>input</td>
+                            <td><span class="type-badge type-text">JSONB</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Input parameters</td>
+                        </tr>
+                        <tr>
+                            <td>output</td>
+                            <td><span class="type-badge type-text">JSONB</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Result data</td>
+                        </tr>
+                        <tr>
+                            <td>error</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Error message if failed</td>
+                        </tr>
+                        <tr>
+                            <td>duration_ms</td>
+                            <td><span class="type-badge type-int">INTEGER</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Execution time in ms</td>
+                        </tr>
+                        <tr>
+                            <td>tokens_used</td>
+                            <td><span class="type-badge type-int">INTEGER</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>AI tokens consumed</td>
+                        </tr>
+                        <tr>
+                            <td>cost_usd</td>
+                            <td><span class="type-badge type-text">DECIMAL(10,4)</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Estimated cost</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Execution start time</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- analytics_events -->
+            <div id="analytics" class="tab-content">
+                <h3>analytics_events</h3>
+                <p>Raw analytics events for tracking visitor behavior.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fk">post_id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>REFERENCES blog_posts(id)</td>
+                            <td>Related post (if any)</td>
+                        </tr>
+                        <tr>
+                            <td>event_type</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>'pageview', 'click', 'scroll', 'share'</td>
+                        </tr>
+                        <tr>
+                            <td>page_path</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>URL path visited</td>
+                        </tr>
+                        <tr>
+                            <td>referrer</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Traffic source</td>
+                        </tr>
+                        <tr>
+                            <td>user_agent</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Browser/device info</td>
+                        </tr>
+                        <tr>
+                            <td>country</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Visitor country</td>
+                        </tr>
+                        <tr>
+                            <td>session_id</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td><span class="nullable">nullable</span></td>
+                            <td>Anonymous session ID</td>
+                        </tr>
+                        <tr>
+                            <td>metadata</td>
+                            <td><span class="type-badge type-text">JSONB</span></td>
+                            <td>DEFAULT '{}'</td>
+                            <td>Extra event data</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Event timestamp</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- comments -->
+            <div id="comments" class="tab-content">
+                <h3>comments</h3>
+                <p>User comments on blog posts (optional feature).</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pk">id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>PRIMARY KEY</td>
+                            <td>Unique identifier</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fk">post_id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>REFERENCES blog_posts(id)</td>
+                            <td>Parent post</td>
+                        </tr>
+                        <tr>
+                            <td>author_name</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Commenter name</td>
+                        </tr>
+                        <tr>
+                            <td>author_email</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Commenter email</td>
+                        </tr>
+                        <tr>
+                            <td>content</td>
+                            <td><span class="type-badge type-text">TEXT</span></td>
+                            <td>NOT NULL</td>
+                            <td>Comment text</td>
+                        </tr>
+                        <tr>
+                            <td>approved</td>
+                            <td><span class="type-badge type-bool">BOOLEAN</span></td>
+                            <td>DEFAULT FALSE</td>
+                            <td>Moderation status</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fk">parent_id</span></td>
+                            <td><span class="type-badge type-uuid">UUID</span></td>
+                            <td>REFERENCES comments(id)</td>
+                            <td>For nested replies</td>
+                        </tr>
+                        <tr>
+                            <td>created_at</td>
+                            <td><span class="type-badge type-timestamp">TIMESTAMPTZ</span></td>
+                            <td>DEFAULT NOW()</td>
+                            <td>Comment time</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔒 Row Level Security Summary</h2>
+            <p>All tables have RLS enabled. Here's the policy overview:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Public Access</th>
+                        <th>Authenticated</th>
+                        <th>Service Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>blog_posts</td>
+                        <td>SELECT (published only)</td>
+                        <td>Full CRUD</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>users</td>
+                        <td>None</td>
+                        <td>Own record only</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>agents</td>
+                        <td>None</td>
+                        <td>SELECT only</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>agent_logs</td>
+                        <td>None</td>
+                        <td>SELECT only</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>analytics_events</td>
+                        <td>INSERT only</td>
+                        <td>SELECT only</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>comments</td>
+                        <td>SELECT (approved), INSERT</td>
+                        <td>Full CRUD</td>
+                        <td>Full access</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="stack.html" style="color: var(--accent-2);">Next: Technology Stack →</a></p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D'
+            }
+        });
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANWE.SH - System Architecture Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .nav-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .nav-card:hover {
+            border-color: var(--accent-1);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(17, 153, 142, 0.2);
+        }
+
+        .nav-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-card .icon {
+            font-size: 1.5rem;
+        }
+
+        .nav-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .overview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏗️ ANWE.SH Architecture</h1>
+            <p>Complete system documentation for the Anwesh Rath personal brand platform with AI-powered content
+                management</p>
+        </header>
+
+        <div class="section">
+            <h2>📊 System Overview</h2>
+            <div class="overview-grid">
+                <div class="stat-card">
+                    <div class="number">3</div>
+                    <div class="label">Domains</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">5+</div>
+                    <div class="label">AI Agents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">10+</div>
+                    <div class="label">DB Tables</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">∞</div>
+                    <div class="label">Possibilities</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="nav-grid">
+            <a href="architecture.html" class="nav-card">
+                <h3><span class="icon">🏛️</span> System Architecture</h3>
+                <p>High-level architecture, domain structure, and how all pieces connect together</p>
+            </a>
+
+            <a href="flowchart.html" class="nav-card">
+                <h3><span class="icon">🔄</span> Data Flow & Workflows</h3>
+                <p>How data moves through the system, agent workflows, and automation pipelines</p>
+            </a>
+
+            <a href="database.html" class="nav-card">
+                <h3><span class="icon">🗄️</span> Database Schema</h3>
+                <p>Complete database structure, tables, relationships, and RLS policies</p>
+            </a>
+
+            <a href="stack.html" class="nav-card">
+                <h3><span class="icon">⚙️</span> Technology Stack</h3>
+                <p>All technologies, frameworks, libraries, and tools used in the system</p>
+            </a>
+
+            <a href="agents.html" class="nav-card">
+                <h3><span class="icon">🤖</span> AI Agents</h3>
+                <p>Ora and the agent swarm - what they do, how they work, and how to extend</p>
+            </a>
+
+            <a href="deployment.html" class="nav-card">
+                <h3><span class="icon">🚀</span> Deployment & DevOps</h3>
+                <p>How to deploy, CI/CD pipelines, environment setup, and infrastructure</p>
+            </a>
+        </nav>
+
+        <div class="section">
+            <h2>🎯 The Vision</h2>
+            <div class="mermaid">
+                graph TB
+                subgraph "Public Facing"
+                A[anwe.sh<br />Marketing Site] --> B[/blog]
+                A --> C[/insights]
+                A --> D[Contact Form]
+                end
+
+                subgraph "Admin Panel"
+                E[app.anwe.sh<br />Dashboard] --> F[Blog Editor]
+                E --> G[Analytics]
+                E --> H[Agent Control]
+                E --> I[Settings]
+                end
+
+                subgraph "API Layer"
+                J[api.anwe.sh<br />Backend API] --> K[Auth]
+                J --> L[Blog CRUD]
+                J --> M[Agent Triggers]
+                J --> N[Webhooks]
+                end
+
+                subgraph "AI Agents"
+                O[Ora<br />Main AI] --> P[Writer Agent]
+                O --> Q[Image Agent]
+                O --> R[SEO Agent]
+                O --> S[Analytics Agent]
+                end
+
+                subgraph "Data Layer"
+                T[(Supabase<br />PostgreSQL)]
+                U[(Redis<br />Cache/Queue)]
+                end
+
+                A --> J
+                E --> J
+                J --> O
+                J --> T
+                O --> T
+                P --> T
+                Q --> T
+                R --> T
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 Domain Structure</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="text-align: left; padding: 1rem;">Domain</th>
+                        <th style="text-align: left; padding: 1rem;">Purpose</th>
+                        <th style="text-align: left; padding: 1rem;">Hosted On</th>
+                        <th style="text-align: left; padding: 1rem;">Stack</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1rem;"><code style="color: var(--accent-2);">anwe.sh</code></td>
+                        <td style="padding: 1rem;">Public marketing site, blog</td>
+                        <td style="padding: 1rem;">Vercel</td>
+                        <td style="padding: 1rem;">Next.js 16</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1rem;"><code style="color: var(--accent-2);">app.anwe.sh</code></td>
+                        <td style="padding: 1rem;">Admin dashboard, content management</td>
+                        <td style="padding: 1rem;">VPS / Vercel</td>
+                        <td style="padding: 1rem;">Next.js 16</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1rem;"><code style="color: var(--accent-2);">api.anwe.sh</code></td>
+                        <td style="padding: 1rem;">Backend API, agent coordination</td>
+                        <td style="padding: 1rem;">VPS</td>
+                        <td style="padding: 1rem;">Node.js + Express</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem;"><code style="color: var(--accent-2);">mail.anwe.sh</code></td>
+                        <td style="padding: 1rem;">Email services</td>
+                        <td style="padding: 1rem;">Zoho / VPS</td>
+                        <td style="padding: 1rem;">MX Records</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>📁 Current File Structure</h2>
+            <pre
+                style="background: var(--surface-2); padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+anwe.sh/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── page.tsx            # Home page
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── globals.css         # Global styles
+│   │   └── blog/
+│   │       ├── page.tsx        # Blog listing
+│   │       └── [slug]/
+│   │           └── page.tsx    # Single post
+│   ├── components/
+│   │   └── marketing/          # Marketing components
+│   │       ├── Hero.tsx
+│   │       ├── Navigation.tsx
+│   │       ├── Stats.tsx
+│   │       ├── Expertise.tsx
+│   │       ├── Journey.tsx
+│   │       ├── CTA.tsx
+│   │       └── Footer.tsx
+│   └── lib/
+│       ├── supabase.ts         # Supabase client
+│       ├── blog.ts             # Blog types
+│       └── mock-posts.ts       # Sample data
+├── public/
+│   ├── logo.png
+│   ├── journey-1.jpg → 5.png   # Timeline photos
+│   └── whatsup/                # This documentation
+├── supabase/
+│   └── migrations/
+│       └── 20260202_create_blog_posts.sql
+├── backend/                    # Express.js API (to be built)
+├── package.json
+├── next.config.ts
+└── tsconfig.json
+            </pre>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p>Last updated: February 2, 2026</p>
+            <p style="margin-top: 0.5rem;">Navigate to individual sections for detailed documentation →</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#111111'
+            }
+        });
+    </script>
+</body>
+
+</html>

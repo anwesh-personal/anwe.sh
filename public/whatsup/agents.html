@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents - ANWE.SH</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-2);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        code {
+            background: var(--surface-2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-2);
+        }
+
+        pre {
+            background: var(--surface-2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            color: var(--text-muted);
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .agent-card {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .agent-card:hover {
+            border-color: var(--accent-1);
+        }
+
+        .agent-card.primary {
+            border-color: var(--accent-1);
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.05));
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .agent-icon {
+            font-size: 2.5rem;
+        }
+
+        .agent-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .agent-type {
+            font-size: 0.75rem;
+            color: var(--accent-2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .agent-card p {
+            font-size: 0.9rem;
+        }
+
+        .agent-section {
+            margin-top: 1rem;
+        }
+
+        .agent-section h5 {
+            font-size: 0.8rem;
+            color: var(--accent-2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-section ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .agent-section li {
+            margin-bottom: 0.25rem;
+        }
+
+        .model-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--surface);
+            margin-top: 0.5rem;
+        }
+
+        .capability-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .capability {
+            background: var(--surface);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .command-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .command-box .cmd {
+            color: var(--accent-2);
+        }
+
+        .command-box .desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>🤖 AI Agents</h1>
+        <p class="subtitle">Ora and the agent swarm - what they do, how they work, and how to extend them</p>
+
+        <div class="section">
+            <h2>🧠 Agent Hierarchy</h2>
+            <p>Ora is the central brain that orchestrates all other specialized agents:</p>
+
+            <div class="mermaid">
+                graph TB
+                subgraph "Command Sources"
+                CHAT[💬 Chat Interface]
+                EMAIL[📧 Email]
+                API[🔌 API Call]
+                CRON[⏰ Scheduler]
+                WEBHOOK[🪝 Webhooks]
+                end
+
+                subgraph "Orchestration Layer"
+                ORA[🧠 ORA<br />Main Brain<br />GPT-4 Turbo]
+                end
+
+                subgraph "Specialized Agents"
+                WRITER[✍️ Writer<br />Claude 3 Opus]
+                IMAGER[🎨 Imager<br />DALL-E 3]
+                SEO[📊 SEO<br />GPT-4 Turbo]
+                SOCIAL[📱 Social<br />GPT-4 Turbo]
+                ANALYST[📈 Analyst<br />GPT-4 Turbo]
+                EDITOR[✏️ Editor<br />Claude 3 Sonnet]
+                end
+
+                subgraph "Output Channels"
+                BLOG[(Blog Posts)]
+                IMAGES[(Image Storage)]
+                TWITTER[Twitter]
+                LINKEDIN[LinkedIn]
+                REPORTS[(Reports)]
+                end
+
+                CHAT --> ORA
+                EMAIL --> ORA
+                API --> ORA
+                CRON --> ORA
+                WEBHOOK --> ORA
+
+                ORA --> WRITER
+                ORA --> IMAGER
+                ORA --> SEO
+                ORA --> SOCIAL
+                ORA --> ANALYST
+                ORA --> EDITOR
+
+                WRITER --> BLOG
+                IMAGER --> IMAGES
+                SOCIAL --> TWITTER
+                SOCIAL --> LINKEDIN
+                ANALYST --> REPORTS
+                SEO --> BLOG
+                EDITOR --> BLOG
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>👥 Agent Registry</h2>
+
+            <div class="agent-grid">
+                <!-- ORA -->
+                <div class="agent-card primary">
+                    <div class="agent-header">
+                        <span class="agent-icon">🧠</span>
+                        <div>
+                            <div class="agent-name">ORA</div>
+                            <div class="agent-type">Orchestrator</div>
+                        </div>
+                    </div>
+                    <p>The central AI brain that understands your intent, breaks down complex tasks, and coordinates
+                        other agents to accomplish goals.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Intent parsing</span>
+                            <span class="capability">Task planning</span>
+                            <span class="capability">Agent coordination</span>
+                            <span class="capability">Error recovery</span>
+                            <span class="capability">Memory</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-section">
+                        <h5>Example Commands</h5>
+                        <ul>
+                            <li>"Write a blog post about AI trends"</li>
+                            <li>"Schedule 5 social posts for next week"</li>
+                            <li>"Analyze my blog performance"</li>
+                            <li>"Update the SEO for all posts"</li>
+                        </ul>
+                    </div>
+
+                    <span class="model-badge">GPT-4 Turbo</span>
+                </div>
+
+                <!-- Writer -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">✍️</span>
+                        <div>
+                            <div class="agent-name">Writer</div>
+                            <div class="agent-type">Content</div>
+                        </div>
+                    </div>
+                    <p>Creates long-form content like blog posts, articles, and essays. Optimized for Anwesh's voice and
+                        expertise areas.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Blog posts</span>
+                            <span class="capability">Articles</span>
+                            <span class="capability">Essays</span>
+                            <span class="capability">Case studies</span>
+                            <span class="capability">Research</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-section">
+                        <h5>Voice Profile</h5>
+                        <ul>
+                            <li>Authoritative but approachable</li>
+                            <li>Data-driven with real examples</li>
+                            <li>Direct, no fluff</li>
+                            <li>Strategic perspective</li>
+                        </ul>
+                    </div>
+
+                    <span class="model-badge">Claude 3 Opus</span>
+                </div>
+
+                <!-- Imager -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">🎨</span>
+                        <div>
+                            <div class="agent-name">Imager</div>
+                            <div class="agent-type">Visual</div>
+                        </div>
+                    </div>
+                    <p>Generates cover images, illustrations, and visual assets that match the brand aesthetic.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Cover images</span>
+                            <span class="capability">Illustrations</span>
+                            <span class="capability">Social graphics</span>
+                            <span class="capability">Diagrams</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-section">
+                        <h5>Style Guide</h5>
+                        <ul>
+                            <li>Dark, minimal aesthetic</li>
+                            <li>Emerald gradient accents</li>
+                            <li>Abstract tech visuals</li>
+                            <li>Clean, modern</li>
+                        </ul>
+                    </div>
+
+                    <span class="model-badge">DALL-E 3</span>
+                </div>
+
+                <!-- SEO -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">📊</span>
+                        <div>
+                            <div class="agent-name">SEO</div>
+                            <div class="agent-type">Optimization</div>
+                        </div>
+                    </div>
+                    <p>Optimizes content for search engines - meta tags, keywords, structure, internal linking.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Meta optimization</span>
+                            <span class="capability">Keyword research</span>
+                            <span class="capability">Content structure</span>
+                            <span class="capability">Internal linking</span>
+                            <span class="capability">Schema markup</span>
+                        </div>
+                    </div>
+
+                    <span class="model-badge">GPT-4 Turbo</span>
+                </div>
+
+                <!-- Social -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">📱</span>
+                        <div>
+                            <div class="agent-name">Social</div>
+                            <div class="agent-type">Distribution</div>
+                        </div>
+                    </div>
+                    <p>Creates social media content and can post to connected platforms.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Twitter threads</span>
+                            <span class="capability">LinkedIn posts</span>
+                            <span class="capability">Scheduling</span>
+                            <span class="capability">Hashtag optimization</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-section">
+                        <h5>Platforms</h5>
+                        <ul>
+                            <li>Twitter/X</li>
+                            <li>LinkedIn</li>
+                            <li>Threads (future)</li>
+                        </ul>
+                    </div>
+
+                    <span class="model-badge">GPT-4 Turbo</span>
+                </div>
+
+                <!-- Analyst -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">📈</span>
+                        <div>
+                            <div class="agent-name">Analyst</div>
+                            <div class="agent-type">Analytics</div>
+                        </div>
+                    </div>
+                    <p>Analyzes content performance, generates reports, and provides insights.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Traffic analysis</span>
+                            <span class="capability">Content performance</span>
+                            <span class="capability">Trend detection</span>
+                            <span class="capability">Recommendations</span>
+                        </div>
+                    </div>
+
+                    <span class="model-badge">GPT-4 Turbo</span>
+                </div>
+
+                <!-- Editor -->
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <span class="agent-icon">✏️</span>
+                        <div>
+                            <div class="agent-name">Editor</div>
+                            <div class="agent-type">Quality</div>
+                        </div>
+                    </div>
+                    <p>Reviews and improves content - grammar, clarity, tone, factual accuracy.</p>
+
+                    <div class="agent-section">
+                        <h5>Capabilities</h5>
+                        <div class="capability-list">
+                            <span class="capability">Proofreading</span>
+                            <span class="capability">Clarity improvements</span>
+                            <span class="capability">Tone alignment</span>
+                            <span class="capability">Fact checking</span>
+                        </div>
+                    </div>
+
+                    <span class="model-badge">Claude 3 Sonnet</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💬 ORA Command Interface</h2>
+            <p>How to interact with ORA and trigger agent workflows:</p>
+
+            <h3>Natural Language Commands</h3>
+            <div class="command-box">
+                <div class="cmd">@ora Write a blog post about why enterprise AI projects fail</div>
+                <div class="desc">→ ORA parses intent → Writer creates draft → SEO optimizes → Imager generates cover →
+                    Published to blog</div>
+            </div>
+
+            <div class="command-box">
+                <div class="cmd">@ora Turn my latest blog post into a Twitter thread</div>
+                <div class="desc">→ ORA fetches latest post → Social extracts key points → Creates thread → Optionally
+                    posts</div>
+            </div>
+
+            <div class="command-box">
+                <div class="cmd">@ora What's my best performing content this month?</div>
+                <div class="desc">→ ORA queries Analyst → Fetches analytics → Generates summary report</div>
+            </div>
+
+            <div class="command-box">
+                <div class="cmd">@ora Schedule 5 LinkedIn posts about my AI expertise for next week</div>
+                <div class="desc">→ ORA plans content calendar → Social generates posts → Schedules with dates</div>
+            </div>
+
+            <h3>API Interface</h3>
+            <pre>
+// POST api.anwe.sh/ora/command
+{
+  "command": "Write a technical blog post about vector databases",
+  "options": {
+    "auto_publish": false,
+    "notify_when_ready": true,
+    "priority": "high"
+  }
+}
+
+// Response
+{
+  "job_id": "job_abc123",
+  "status": "queued",
+  "estimated_completion": "2-5 minutes",
+  "webhook_url": "Optional callback URL"
+}</pre>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Agent Configuration</h2>
+
+            <h3>Writer Agent Config Example</h3>
+            <pre>
+{
+  "name": "writer",
+  "model": "claude-3-opus",
+  "config": {
+    "voice_profile": {
+      "tone": "authoritative, approachable",
+      "style": "direct, data-driven",
+      "perspective": "strategic enterprise view",
+      "avoid": ["fluff", "buzzwords", "generic advice"]
+    },
+    "content_defaults": {
+      "min_words": 1000,
+      "max_words": 3000,
+      "include_examples": true,
+      "include_data": true
+    },
+    "expertise_areas": [
+      "AI systems architecture",
+      "Enterprise software",
+      "Product psychology",
+      "Leadership"
+    ],
+    "reference_sources": [
+      "Previous blog posts",
+      "Industry research",
+      "Personal anecdotes"
+    ]
+  }
+}</pre>
+
+            <h3>Imager Agent Config Example</h3>
+            <pre>
+{
+  "name": "imager",
+  "model": "dall-e-3",
+  "config": {
+    "style_guide": {
+      "aesthetic": "dark, minimal, tech",
+      "colors": ["#0a0a0a", "#11998E", "#38EF7D"],
+      "mood": "futuristic, professional",
+      "avoid": ["people", "faces", "text", "logos"]
+    },
+    "default_settings": {
+      "size": "1792x1024",
+      "quality": "hd",
+      "style": "vivid"
+    }
+  }
+}</pre>
+        </div>
+
+        <div class="section">
+            <h2>➕ Adding New Agents</h2>
+            <p>The system is designed to be extensible. To add a new agent:</p>
+
+            <h3>1. Register in Database</h3>
+            <pre>
+INSERT INTO agents (name, type, description, model, config)
+VALUES (
+  'translator',
+  'content',
+  'Translates content to other languages',
+  'gpt-4-turbo',
+  '{
+    "languages": ["Spanish", "French", "Hindi"],
+    "preserve_tone": true
+  }'
+);</pre>
+
+            <h3>2. Create Agent Handler</h3>
+            <pre>
+// backend/agents/translator.js
+export class TranslatorAgent {
+  constructor(config) {
+    this.config = config;
+    this.model = config.model;
+  }
+
+  async execute(input) {
+    const { content, targetLanguage } = input;
+    
+    const prompt = `
+      Translate the following content to ${targetLanguage}.
+      Preserve the tone and style of the original.
+      
+      Content:
+      ${content}
+    `;
+    
+    const result = await this.llm.complete(prompt);
+    
+    return {
+      translatedContent: result,
+      sourceLanguage: 'English',
+      targetLanguage
+    };
+  }
+}</pre>
+
+            <h3>3. Register with ORA</h3>
+            <pre>
+// backend/agents/ora.js
+import { TranslatorAgent } from './translator.js';
+
+// Add to ORA's agent registry
+ora.registerAgent('translator', TranslatorAgent);
+
+// Now ORA can use it:
+// "@ora translate my latest post to Spanish"</pre>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="deployment.html" style="color: var(--accent-2);">Next: Deployment & DevOps →</a></p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D'
+            }
+        });
+    </script>
+</body>
+
+</html>

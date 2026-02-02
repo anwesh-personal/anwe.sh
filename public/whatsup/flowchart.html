@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Flow & Workflows - ANWE.SH</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--accent-2);
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        ul,
+        ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: var(--surface-2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-2);
+        }
+
+        .workflow-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .workflow-card h4 {
+            color: var(--accent-2);
+            margin-bottom: 0.75rem;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .step-list li {
+            counter-increment: step;
+            padding-left: 2.5rem;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #000;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+            border: 1px solid var(--accent-1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .trigger-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .trigger-manual {
+            background: #4a4a4a;
+            color: #fff;
+        }
+
+        .trigger-auto {
+            background: var(--accent-1);
+            color: #000;
+        }
+
+        .trigger-schedule {
+            background: #8b5cf6;
+            color: #fff;
+        }
+
+        .trigger-webhook {
+            background: #f59e0b;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>🔄 Data Flow & Workflows</h1>
+        <p class="subtitle">How data moves through the system, agent workflows, and automation pipelines</p>
+
+        <div class="section">
+            <h2>📝 Content Creation Workflow</h2>
+            <p>There are multiple ways content gets created - manually, via AI, or through automation:</p>
+
+            <div class="mermaid">
+                flowchart TB
+                subgraph "Content Sources"
+                M[Manual - Admin Panel]
+                O[Ora AI Command]
+                S[Scheduled Agent]
+                W[Webhook Trigger]
+                end
+
+                subgraph "Processing Pipeline"
+                direction TB
+                V[Validation]
+                AI[AI Enhancement]
+                IMG[Image Generation]
+                SEO[SEO Optimization]
+                REVIEW[Review Queue]
+                end
+
+                subgraph "Publishing"
+                DB[(blog_posts table)]
+                ISR[Trigger ISR]
+                NOTIFY[Notifications]
+                end
+
+                subgraph "Distribution"
+                SITE[anwe.sh/blog]
+                SOCIAL[Social Media]
+                EMAIL[Newsletter]
+                end
+
+                M --> V
+                O --> V
+                S --> V
+                W --> V
+
+                V --> AI
+                AI --> IMG
+                IMG --> SEO
+                SEO --> REVIEW
+
+                REVIEW -->|Approved| DB
+                REVIEW -->|Draft| DB
+
+                DB --> ISR
+                ISR --> SITE
+
+                DB --> NOTIFY
+                NOTIFY --> SOCIAL
+                NOTIFY --> EMAIL
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🤖 Agent Orchestration Flow</h2>
+            <p>Ora coordinates multiple specialized agents to accomplish complex tasks:</p>
+
+            <div class="mermaid">
+                sequenceDiagram
+                participant U as User/Trigger
+                participant ORA as Ora (Brain)
+                participant W as Writer Agent
+                participant I as Image Agent
+                participant S as SEO Agent
+                participant P as Publisher Agent
+                participant DB as Supabase
+
+                U->>ORA: "Write a blog post about AI trends"
+
+                ORA->>ORA: Parse intent & plan
+
+                ORA->>W: Generate article
+                Note over W: Uses GPT-4/Claude<br />Research + Write
+                W-->>ORA: Draft content
+
+                ORA->>I: Generate cover image
+                Note over I: Uses DALL-E/Midjourney<br />Based on content
+                I-->>ORA: Image URL
+
+                ORA->>S: Optimize for SEO
+                Note over S: Meta tags<br />Keywords<br />Structure
+                S-->>ORA: SEO metadata
+
+                ORA->>ORA: Assemble final post
+
+                ORA->>P: Publish to blog
+                P->>DB: INSERT blog_posts
+                DB-->>P: Success
+                P-->>ORA: Published
+
+                ORA-->>U: "Published: anwe.sh/blog/ai-trends-2026"
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Workflow Triggers</h2>
+
+            <div class="workflow-card">
+                <h4><span class="trigger-badge trigger-manual">MANUAL</span> Admin Panel Actions</h4>
+                <p>Direct actions from the admin dashboard:</p>
+                <ul class="step-list">
+                    <li>Admin logs into <code>app.anwe.sh</code></li>
+                    <li>Navigates to Blog → New Post</li>
+                    <li>Writes or pastes content in rich editor</li>
+                    <li>Optionally clicks "Enhance with AI"</li>
+                    <li>Reviews preview and publishes</li>
+                    <li>Post goes live within 60 seconds (ISR)</li>
+                </ul>
+            </div>
+
+            <div class="workflow-card">
+                <h4><span class="trigger-badge trigger-auto">AUTO</span> Ora Command Interface</h4>
+                <p>Trigger via messaging Ora (chat, email, API):</p>
+                <div class="mermaid">
+                    flowchart LR
+                    CMD["@Ora write about<br />enterprise AI failure modes"]
+                    CMD --> PARSE[Parse Command]
+                    PARSE --> EXEC[Execute Agents]
+                    EXEC --> RESULT["✅ Post created<br />URL: anwe.sh/blog/..."]
+                </div>
+                <p>Ora can be triggered via:</p>
+                <ul>
+                    <li>Chat interface in admin panel</li>
+                    <li>Email to ora@anwe.sh</li>
+                    <li>API call to <code>api.anwe.sh/ora/command</code></li>
+                    <li>Slack/Discord integration</li>
+                </ul>
+            </div>
+
+            <div class="workflow-card">
+                <h4><span class="trigger-badge trigger-schedule">SCHEDULE</span> Cron-Based Automation</h4>
+                <p>Scheduled tasks running on intervals:</p>
+                <div class="mermaid">
+                    flowchart TB
+                    CRON[Cron Job<br />Every Monday 9 AM]
+                    CRON --> CHECK{Content Queue<br />Empty?}
+                    CHECK -->|Yes| GENERATE[Generate New Post]
+                    CHECK -->|No| PUBLISH[Publish from Queue]
+                    GENERATE --> AI[AI Writer Agent]
+                    AI --> QUEUE[Add to Review Queue]
+                    PUBLISH --> LIVE[Publish to Site]
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <h4><span class="trigger-badge trigger-webhook">WEBHOOK</span> External Triggers</h4>
+                <p>React to external events:</p>
+                <ul>
+                    <li><strong>GitHub:</strong> Code pushed → Write changelog post</li>
+                    <li><strong>Twitter:</strong> Viral tweet → Expand into blog post</li>
+                    <li><strong>News API:</strong> Industry news → Commentary post</li>
+                    <li><strong>Calendar:</strong> Event reminder → Prep social content</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Analytics Data Flow</h2>
+
+            <div class="mermaid">
+                flowchart TB
+                subgraph "Data Collection"
+                VP[Page Views]
+                CL[Link Clicks]
+                TM[Time on Page]
+                SC[Scroll Depth]
+                REF[Referrer Data]
+                end
+
+                subgraph "Processing"
+                AGG[Aggregator Service]
+                ENRICH[Data Enrichment]
+                end
+
+                subgraph "Storage"
+                ANALYTICS[(analytics_events)]
+                SUMMARY[(daily_summaries)]
+                end
+
+                subgraph "Reporting"
+                DASH[Dashboard]
+                REPORT[Weekly Reports]
+                ALERT[Anomaly Alerts]
+                end
+
+                VP --> AGG
+                CL --> AGG
+                TM --> AGG
+                SC --> AGG
+                REF --> AGG
+
+                AGG --> ENRICH
+                ENRICH --> ANALYTICS
+
+                ANALYTICS --> SUMMARY
+                SUMMARY --> DASH
+                SUMMARY --> REPORT
+                ANALYTICS --> ALERT
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Real-time Sync Flow</h2>
+            <p>How changes propagate across the system in real-time:</p>
+
+            <div class="mermaid">
+                sequenceDiagram
+                participant ADMIN as Admin Panel
+                participant API as API Server
+                participant DB as Supabase
+                participant RT as Realtime
+                participant WEB as Marketing Site
+                participant CDN as Edge Cache
+
+                ADMIN->>API: Update post
+                API->>DB: UPDATE blog_posts
+                DB-->>API: Success
+
+                DB->>RT: Broadcast change
+                RT-->>ADMIN: Update UI
+
+                API->>CDN: Purge cache
+                CDN-->>API: Purged
+
+                Note over WEB,CDN: Next visitor gets fresh content
+
+                API->>API: Trigger ISR
+                Note over WEB: Page regenerates in background
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚨 Error Handling Flow</h2>
+
+            <div class="mermaid">
+                flowchart TB
+                ERR[Error Occurs]
+                ERR --> LOG[Log to System]
+                ERR --> CLASSIFY{Error Type?}
+
+                CLASSIFY -->|Recoverable| RETRY[Retry with Backoff]
+                CLASSIFY -->|Critical| ALERT[Alert Admin]
+                CLASSIFY -->|User Error| FEEDBACK[Show User Message]
+
+                RETRY --> SUCCESS{Success?}
+                SUCCESS -->|Yes| CONTINUE[Continue Flow]
+                SUCCESS -->|No, Max Retries| FALLBACK[Fallback Action]
+
+                FALLBACK --> QUEUE[Queue for Manual Review]
+                ALERT --> SLACK[Slack Notification]
+                ALERT --> EMAIL[Email Alert]
+
+                QUEUE --> ADMIN[Admin Reviews]
+                ADMIN --> RESOLVE[Manual Resolution]
+            </div>
+
+            <div class="highlight-box">
+                <h4>Error Categories</h4>
+                <ul>
+                    <li><strong>Recoverable:</strong> API timeouts, rate limits, temporary failures</li>
+                    <li><strong>Critical:</strong> Database down, auth failure, agent crash</li>
+                    <li><strong>User Error:</strong> Invalid input, permission denied</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="database.html" style="color: var(--accent-2);">Next: Database Schema →</a></p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#111111'
+            }
+        });
+    </script>
+</body>
+
+</html>

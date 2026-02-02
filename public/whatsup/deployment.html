@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment & DevOps - ANWE.SH</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            margin: 2rem 0 0.75rem;
+            color: var(--accent-2);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        ul {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        code {
+            background: var(--surface-2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-2);
+        }
+
+        pre {
+            background: var(--surface-2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--text-muted);
+        }
+
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .env-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .env-card h4 {
+            color: var(--accent-2);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .env-card pre {
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .step-list li {
+            counter-increment: step;
+            padding-left: 3rem;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            width: 2rem;
+            height: 2rem;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #000;
+        }
+
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 2rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: var(--accent-2);
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box h4 {
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .info-box h4 {
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>🚀 Deployment & DevOps</h1>
+        <p class="subtitle">How to deploy, CI/CD pipelines, environment setup, and infrastructure management</p>
+
+        <div class="section">
+            <h2>🏗️ Deployment Architecture</h2>
+
+            <div class="mermaid">
+                graph TB
+                subgraph "Source Control"
+                GH[GitHub<br />anwesh-personal/anwe.sh]
+                end
+
+                subgraph "CI/CD"
+                GHA[GitHub Actions]
+                VC[Vercel CI]
+                end
+
+                subgraph "Vercel"
+                VM[Marketing Site<br />anwe.sh]
+                VP[Preview Deploys<br />*.vercel.app]
+                end
+
+                subgraph "VPS (72.61.254.206)"
+                NGINX[Nginx<br />Reverse Proxy]
+                PM2[PM2<br />Process Manager]
+                API[API Server<br />:3001]
+                ADMIN[Admin App<br />:3002]
+                REDIS[Redis<br />:6379]
+                WORKER[Background Workers]
+                end
+
+                subgraph "External Services"
+                SUPA[Supabase]
+                OPENAI[OpenAI]
+                CLAUDE[Anthropic]
+                end
+
+                GH -->|Push to main| VC
+                GH -->|Push to main| GHA
+
+                VC --> VM
+                VC --> VP
+
+                GHA -->|SSH Deploy| PM2
+
+                PM2 --> API
+                PM2 --> ADMIN
+                PM2 --> WORKER
+
+                NGINX --> API
+                NGINX --> ADMIN
+
+                API --> SUPA
+                API --> REDIS
+                API --> OPENAI
+                API --> CLAUDE
+                WORKER --> REDIS
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>▲ Vercel Deployment (Marketing Site)</h2>
+
+            <h3>Current Setup</h3>
+            <table>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Repository</td>
+                    <td><code>anwesh-personal/anwe.sh</code></td>
+                </tr>
+                <tr>
+                    <td>Branch</td>
+                    <td><code>main</code></td>
+                </tr>
+                <tr>
+                    <td>Framework</td>
+                    <td>Next.js</td>
+                </tr>
+                <tr>
+                    <td>Root Directory</td>
+                    <td><code>/</code> (root)</td>
+                </tr>
+                <tr>
+                    <td>Build Command</td>
+                    <td><code>npm run build</code></td>
+                </tr>
+                <tr>
+                    <td>Output Directory</td>
+                    <td><code>.next</code></td>
+                </tr>
+                <tr>
+                    <td>Node Version</td>
+                    <td>20.x</td>
+                </tr>
+            </table>
+
+            <h3>Deployment Flow</h3>
+            <ol class="step-list">
+                <li><strong>Push to GitHub</strong> - Code pushed to <code>main</code> branch</li>
+                <li><strong>Vercel Webhook Triggered</strong> - Automatic build starts</li>
+                <li><strong>Install Dependencies</strong> - <code>npm install</code></li>
+                <li><strong>Build Next.js</strong> - <code>npm run build</code></li>
+                <li><strong>Deploy to Edge</strong> - Static files + serverless functions</li>
+                <li><strong>SSL Certificate</strong> - Auto-provisioned via Let's Encrypt</li>
+                <li><strong>Live on anwe.sh</strong> - Usually under 60 seconds</li>
+            </ol>
+
+            <h3>vercel.json</h3>
+            <pre>
+{
+  "framework": "nextjs"
+}</pre>
+
+            <div class="info-box">
+                <h4>ℹ️ Preview Deployments</h4>
+                <p>Every pull request gets a preview URL at <code>*.vercel.app</code>. Great for testing changes before
+                    merging.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🖥️ VPS Deployment (API + Admin)</h2>
+
+            <h3>Server Requirements</h3>
+            <ul>
+                <li>Ubuntu 22.04 LTS or newer</li>
+                <li>2+ GB RAM</li>
+                <li>Node.js 20.x LTS</li>
+                <li>Nginx</li>
+                <li>PM2</li>
+                <li>Redis 7.x</li>
+                <li>Docker (optional)</li>
+            </ul>
+
+            <h3>Directory Structure on VPS</h3>
+            <pre>
+/var/www/
+├── anwe-api/           # API Server
+│   ├── src/
+│   ├── package.json
+│   ├── ecosystem.config.js
+│   └── .env
+├── anwe-admin/         # Admin Panel (Next.js)
+│   ├── .next/
+│   ├── package.json
+│   └── .env.local
+└── anwe-workers/       # Background Workers
+    ├── src/
+    ├── package.json
+    └── .env</pre>
+
+            <h3>PM2 Ecosystem Config</h3>
+            <pre>
+// ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: 'anwe-api',
+      script: 'src/server.js',
+      cwd: '/var/www/anwe-api',
+      instances: 2,
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3001
+      }
+    },
+    {
+      name: 'anwe-admin',
+      script: 'npm',
+      args: 'start',
+      cwd: '/var/www/anwe-admin',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3002
+      }
+    },
+    {
+      name: 'anwe-workers',
+      script: 'src/worker.js',
+      cwd: '/var/www/anwe-workers',
+      instances: 1,
+      env: {
+        NODE_ENV: 'production'
+      }
+    }
+  ]
+};</pre>
+
+            <h3>Nginx Configuration</h3>
+            <pre>
+# /etc/nginx/sites-available/anwe.sh
+
+# API Server
+server {
+    listen 443 ssl http2;
+    server_name api.anwe.sh;
+    
+    ssl_certificate /etc/letsencrypt/live/anwe.sh/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/anwe.sh/privkey.pem;
+    
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Admin Panel
+server {
+    listen 443 ssl http2;
+    server_name app.anwe.sh;
+    
+    ssl_certificate /etc/letsencrypt/live/anwe.sh/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/anwe.sh/privkey.pem;
+    
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</pre>
+
+            <h3>Deployment Commands</h3>
+            <pre>
+# SSH into server
+ssh user@72.61.254.206
+
+# Pull latest code
+cd /var/www/anwe-api
+git pull origin main
+
+# Install dependencies
+npm install --production
+
+# Restart with zero downtime
+pm2 reload anwe-api
+
+# Check status
+pm2 status
+pm2 logs anwe-api</pre>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Environment Variables</h2>
+
+            <div class="env-grid">
+                <div class="env-card">
+                    <h4>📄 Marketing Site (.env.local)</h4>
+                    <pre>
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
+
+# Optional: Analytics
+NEXT_PUBLIC_GA_ID=G-XXXXXXX</pre>
+                </div>
+
+                <div class="env-card">
+                    <h4>📄 API Server (.env)</h4>
+                    <pre>
+# Server
+NODE_ENV=production
+PORT=3001
+API_URL=https://api.anwe.sh
+
+# Supabase
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbG...
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# AI Providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Auth
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=100</pre>
+                </div>
+
+                <div class="env-card">
+                    <h4>📄 Admin Panel (.env.local)</h4>
+                    <pre>
+# API
+NEXT_PUBLIC_API_URL=https://api.anwe.sh
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
+
+# Auth
+NEXTAUTH_URL=https://app.anwe.sh
+NEXTAUTH_SECRET=your-secret</pre>
+                </div>
+
+                <div class="env-card">
+                    <h4>📄 Workers (.env)</h4>
+                    <pre>
+# Redis Queue
+REDIS_URL=redis://localhost:6379
+
+# Supabase
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbG...
+
+# AI
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Storage
+S3_BUCKET=anwe-assets
+S3_REGION=us-east-1
+S3_ACCESS_KEY=AKIA...
+S3_SECRET_KEY=...</pre>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Security Warning</h4>
+                <p>Never commit <code>.env</code> files to git. Use <code>.env.example</code> as a template. Store
+                    secrets in Vercel's dashboard or your VPS securely.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 CI/CD Pipeline</h2>
+
+            <h3>GitHub Actions Workflow</h3>
+            <pre>
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # Marketing site auto-deploys via Vercel
+  
+  deploy-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/anwe-api
+            git pull origin main
+            npm install --production
+            pm2 reload anwe-api
+            
+  deploy-workers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy Workers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/anwe-workers
+            git pull origin main
+            npm install --production
+            pm2 reload anwe-workers</pre>
+        </div>
+
+        <div class="section">
+            <h2>✅ Deployment Checklist</h2>
+
+            <h3>First-Time Setup</h3>
+            <ul class="checklist">
+                <li>Connect GitHub repo to Vercel</li>
+                <li>Set Vercel environment variables</li>
+                <li>Configure custom domain in Vercel</li>
+                <li>Set up DNS records (A, CNAME)</li>
+                <li>Provision VPS with required software</li>
+                <li>Configure Nginx with SSL</li>
+                <li>Set up PM2 ecosystem</li>
+                <li>Install and configure Redis</li>
+                <li>Create Supabase project</li>
+                <li>Run database migrations</li>
+                <li>Set up GitHub Actions secrets</li>
+            </ul>
+
+            <h3>Every Deployment</h3>
+            <ul class="checklist">
+                <li>Run local build to verify</li>
+                <li>Check for TypeScript errors</li>
+                <li>Test critical flows locally</li>
+                <li>Push to main branch</li>
+                <li>Verify Vercel deployment succeeded</li>
+                <li>Check VPS deployment logs</li>
+                <li>Smoke test production site</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📊 Monitoring</h2>
+
+            <h3>Tools & Services</h3>
+            <table>
+                <tr>
+                    <th>What</th>
+                    <th>Tool</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>Uptime</td>
+                    <td>Vercel Analytics / Uptime Robot</td>
+                    <td>Site availability</td>
+                </tr>
+                <tr>
+                    <td>Errors</td>
+                    <td>Vercel / PM2 logs</td>
+                    <td>Application errors</td>
+                </tr>
+                <tr>
+                    <td>Performance</td>
+                    <td>Vercel Speed Insights</td>
+                    <td>Core Web Vitals</td>
+                </tr>
+                <tr>
+                    <td>API Health</td>
+                    <td>PM2 / Custom endpoint</td>
+                    <td>Backend status</td>
+                </tr>
+                <tr>
+                    <td>Queue Status</td>
+                    <td>BullMQ Board</td>
+                    <td>Job queue monitoring</td>
+                </tr>
+            </table>
+
+            <h3>Health Check Endpoint</h3>
+            <pre>
+// GET api.anwe.sh/health
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "uptime": "2d 14h 32m",
+  "services": {
+    "database": "connected",
+    "redis": "connected",
+    "workers": "running"
+  },
+  "timestamp": "2026-02-02T20:30:00Z"
+}</pre>
+        </div>
+
+        <div class="section">
+            <h2>🔙 Rollback Procedures</h2>
+
+            <h3>Vercel Rollback</h3>
+            <p>Vercel keeps all deployment history. To rollback:</p>
+            <ol>
+                <li>Go to Vercel Dashboard → Deployments</li>
+                <li>Find the last working deployment</li>
+                <li>Click "..." → "Promote to Production"</li>
+                <li>Instant rollback, no rebuild needed</li>
+            </ol>
+
+            <h3>VPS Rollback</h3>
+            <pre>
+# SSH into server
+ssh user@72.61.254.206
+
+# Check git history
+cd /var/www/anwe-api
+git log --oneline -10
+
+# Rollback to specific commit
+git checkout &lt;commit-hash&gt;
+
+# OR rollback to previous commit
+git reset --hard HEAD~1
+
+# Restart services
+pm2 reload all</pre>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="index.html" style="color: var(--accent-2);">← Back to Overview</a></p>
+            <p style="margin-top: 1rem;">Last updated: February 2, 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D'
+            }
+        });
+    </script>
+</body>
+
+</html>

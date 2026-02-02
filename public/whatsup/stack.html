@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technology Stack - ANWE.SH</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-2);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tech-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .tech-card:hover {
+            border-color: var(--accent-1);
+            transform: translateY(-2px);
+        }
+
+        .tech-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-icon {
+            font-size: 2rem;
+        }
+
+        .tech-card h4 {
+            font-size: 1.1rem;
+        }
+
+        .tech-card .version {
+            color: var(--accent-2);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .tech-card p {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tech-card ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .tech-card li {
+            margin-bottom: 0.25rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .category-header h2 {
+            margin-bottom: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-core {
+            background: var(--accent-1);
+            color: #000;
+        }
+
+        .badge-dev {
+            background: #8b5cf6;
+            color: #fff;
+        }
+
+        .badge-infra {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .badge-ai {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .dep-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .dep-table th,
+        .dep-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dep-table th {
+            color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        .dep-table code {
+            background: var(--surface);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>⚙️ Technology Stack</h1>
+        <p class="subtitle">All technologies, frameworks, libraries, and tools used in the ANWE.SH platform</p>
+
+        <!-- Frontend -->
+        <div class="section">
+            <div class="category-header">
+                <span class="badge badge-core">FRONTEND</span>
+                <h2>Marketing Site & Admin Panel</h2>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">⚡</span>
+                        <div>
+                            <h4>Next.js</h4>
+                            <span class="version">v16.1.6</span>
+                        </div>
+                    </div>
+                    <p>React framework with App Router, SSG, ISR, and API routes.</p>
+                    <ul>
+                        <li>App Router for file-based routing</li>
+                        <li>Server Components by default</li>
+                        <li>Incremental Static Regeneration</li>
+                        <li>Turbopack for fast dev builds</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">⚛️</span>
+                        <div>
+                            <h4>React</h4>
+                            <span class="version">v19.2.3</span>
+                        </div>
+                    </div>
+                    <p>UI library with latest features.</p>
+                    <ul>
+                        <li>Server Components</li>
+                        <li>Suspense & Streaming</li>
+                        <li>use() hook</li>
+                        <li>React Compiler ready</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🎨</span>
+                        <div>
+                            <h4>Tailwind CSS</h4>
+                            <span class="version">v4.x</span>
+                        </div>
+                    </div>
+                    <p>Utility-first CSS framework.</p>
+                    <ul>
+                        <li>Zero-config CSS variables</li>
+                        <li>JIT compilation</li>
+                        <li>Dark mode support</li>
+                        <li>Custom design tokens</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🎬</span>
+                        <div>
+                            <h4>GSAP</h4>
+                            <span class="version">v3.14.2</span>
+                        </div>
+                    </div>
+                    <p>Professional animation library.</p>
+                    <ul>
+                        <li>ScrollTrigger for scroll animations</li>
+                        <li>ScrollToPlugin for smooth scroll</li>
+                        <li>Timeline sequencing</li>
+                        <li>High performance</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🌊</span>
+                        <div>
+                            <h4>Framer Motion</h4>
+                            <span class="version">v12.29.3</span>
+                        </div>
+                    </div>
+                    <p>React animation library.</p>
+                    <ul>
+                        <li>Declarative animations</li>
+                        <li>Gesture handling</li>
+                        <li>Layout animations</li>
+                        <li>Exit animations</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">📝</span>
+                        <div>
+                            <h4>TypeScript</h4>
+                            <span class="version">v5.x</span>
+                        </div>
+                    </div>
+                    <p>Static typing for JavaScript.</p>
+                    <ul>
+                        <li>Type safety</li>
+                        <li>Better IDE support</li>
+                        <li>Self-documenting code</li>
+                        <li>Catch errors early</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backend -->
+        <div class="section">
+            <div class="category-header">
+                <span class="badge badge-core">BACKEND</span>
+                <h2>API Server & Workers</h2>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🟢</span>
+                        <div>
+                            <h4>Node.js</h4>
+                            <span class="version">v20+ LTS</span>
+                        </div>
+                    </div>
+                    <p>JavaScript runtime for the backend.</p>
+                    <ul>
+                        <li>ES Modules by default</li>
+                        <li>Native fetch API</li>
+                        <li>Built-in test runner</li>
+                        <li>Performance optimized</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🚂</span>
+                        <div>
+                            <h4>Express.js</h4>
+                            <span class="version">v4.18.2</span>
+                        </div>
+                    </div>
+                    <p>Minimal web framework for APIs.</p>
+                    <ul>
+                        <li>REST API endpoints</li>
+                        <li>Middleware pipeline</li>
+                        <li>Request validation</li>
+                        <li>Error handling</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🔴</span>
+                        <div>
+                            <h4>Redis</h4>
+                            <span class="version">v7.x</span>
+                        </div>
+                    </div>
+                    <p>In-memory data store.</p>
+                    <ul>
+                        <li>Job queues (BullMQ)</li>
+                        <li>Session storage</li>
+                        <li>Caching layer</li>
+                        <li>Pub/Sub messaging</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">📊</span>
+                        <div>
+                            <h4>BullMQ</h4>
+                            <span class="version">v4.x</span>
+                        </div>
+                    </div>
+                    <p>Queue system for background jobs.</p>
+                    <ul>
+                        <li>Agent task queues</li>
+                        <li>Retry with backoff</li>
+                        <li>Scheduled jobs</li>
+                        <li>Job prioritization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database -->
+        <div class="section">
+            <div class="category-header">
+                <span class="badge badge-infra">DATABASE</span>
+                <h2>Data Storage & Auth</h2>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">⚡</span>
+                        <div>
+                            <h4>Supabase</h4>
+                            <span class="version">Latest</span>
+                        </div>
+                    </div>
+                    <p>Open-source Firebase alternative.</p>
+                    <ul>
+                        <li>PostgreSQL database</li>
+                        <li>Row Level Security</li>
+                        <li>Auth & JWT</li>
+                        <li>Realtime subscriptions</li>
+                        <li>Storage for files</li>
+                        <li>Edge Functions</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🐘</span>
+                        <div>
+                            <h4>PostgreSQL</h4>
+                            <span class="version">v15+</span>
+                        </div>
+                    </div>
+                    <p>Relational database (via Supabase).</p>
+                    <ul>
+                        <li>JSONB for flexible data</li>
+                        <li>Full-text search</li>
+                        <li>Triggers & functions</li>
+                        <li>Strong consistency</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI -->
+        <div class="section">
+            <div class="category-header">
+                <span class="badge badge-ai">AI</span>
+                <h2>AI Models & Services</h2>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🧠</span>
+                        <div>
+                            <h4>OpenAI API</h4>
+                            <span class="version">GPT-4 Turbo</span>
+                        </div>
+                    </div>
+                    <p>Primary LLM for orchestration.</p>
+                    <ul>
+                        <li>Ora brain (orchestrator)</li>
+                        <li>SEO optimization</li>
+                        <li>Social content</li>
+                        <li>Function calling</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🎭</span>
+                        <div>
+                            <h4>Anthropic Claude</h4>
+                            <span class="version">Claude 3 Opus</span>
+                        </div>
+                    </div>
+                    <p>Premium LLM for content writing.</p>
+                    <ul>
+                        <li>Long-form articles</li>
+                        <li>Nuanced writing</li>
+                        <li>200K context window</li>
+                        <li>Better at reasoning</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🎨</span>
+                        <div>
+                            <h4>DALL-E 3</h4>
+                            <span class="version">OpenAI</span>
+                        </div>
+                    </div>
+                    <p>Image generation for covers.</p>
+                    <ul>
+                        <li>Blog cover images</li>
+                        <li>Social media graphics</li>
+                        <li>Consistent style</li>
+                        <li>High resolution</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">💎</span>
+                        <div>
+                            <h4>Google Gemini</h4>
+                            <span class="version">Pro/Ultra</span>
+                        </div>
+                    </div>
+                    <p>Multimodal AI (backup/specialized).</p>
+                    <ul>
+                        <li>Image understanding</li>
+                        <li>Video analysis</li>
+                        <li>Alternative LLM</li>
+                        <li>Code generation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Infrastructure -->
+        <div class="section">
+            <div class="category-header">
+                <span class="badge badge-infra">INFRASTRUCTURE</span>
+                <h2>Hosting & DevOps</h2>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">▲</span>
+                        <div>
+                            <h4>Vercel</h4>
+                            <span class="version">Pro</span>
+                        </div>
+                    </div>
+                    <p>Next.js hosting platform.</p>
+                    <ul>
+                        <li>Marketing site (anwe.sh)</li>
+                        <li>Edge functions</li>
+                        <li>Auto SSL</li>
+                        <li>Git push deploys</li>
+                        <li>Preview deployments</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🖥️</span>
+                        <div>
+                            <h4>VPS</h4>
+                            <span class="version">Your Server</span>
+                        </div>
+                    </div>
+                    <p>Virtual private server.</p>
+                    <ul>
+                        <li>API server (api.anwe.sh)</li>
+                        <li>Admin panel option</li>
+                        <li>Background workers</li>
+                        <li>Redis hosting</li>
+                        <li>Email services</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🐳</span>
+                        <div>
+                            <h4>Docker</h4>
+                            <span class="version">Latest</span>
+                        </div>
+                    </div>
+                    <p>Containerization.</p>
+                    <ul>
+                        <li>Consistent environments</li>
+                        <li>Easy deployment</li>
+                        <li>Docker Compose for dev</li>
+                        <li>Isolated services</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <span class="tech-icon">🔐</span>
+                        <div>
+                            <h4>Cloudflare</h4>
+                            <span class="version">Free/Pro</span>
+                        </div>
+                    </div>
+                    <p>CDN & security.</p>
+                    <ul>
+                        <li>DDoS protection</li>
+                        <li>Edge caching</li>
+                        <li>DNS management</li>
+                        <li>SSL/TLS</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dependencies Table -->
+        <div class="section">
+            <h2>📦 package.json Dependencies</h2>
+
+            <h3>Production Dependencies</h3>
+            <table class="dep-table">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>next</code></td>
+                        <td>16.1.6</td>
+                        <td>React framework</td>
+                    </tr>
+                    <tr>
+                        <td><code>react</code></td>
+                        <td>19.2.3</td>
+                        <td>UI library</td>
+                    </tr>
+                    <tr>
+                        <td><code>react-dom</code></td>
+                        <td>19.2.3</td>
+                        <td>React DOM renderer</td>
+                    </tr>
+                    <tr>
+                        <td><code>@supabase/supabase-js</code></td>
+                        <td>^2.93.3</td>
+                        <td>Supabase client</td>
+                    </tr>
+                    <tr>
+                        <td><code>gsap</code></td>
+                        <td>^3.14.2</td>
+                        <td>Animations</td>
+                    </tr>
+                    <tr>
+                        <td><code>@gsap/react</code></td>
+                        <td>^2.1.2</td>
+                        <td>GSAP React hooks</td>
+                    </tr>
+                    <tr>
+                        <td><code>framer-motion</code></td>
+                        <td>^12.29.3</td>
+                        <td>React animations</td>
+                    </tr>
+                    <tr>
+                        <td><code>clsx</code></td>
+                        <td>^2.1.1</td>
+                        <td>Class name utility</td>
+                    </tr>
+                    <tr>
+                        <td><code>tailwind-merge</code></td>
+                        <td>^3.4.0</td>
+                        <td>Merge Tailwind classes</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Dev Dependencies</h3>
+            <table class="dep-table">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>typescript</code></td>
+                        <td>^5</td>
+                        <td>Type checking</td>
+                    </tr>
+                    <tr>
+                        <td><code>tailwindcss</code></td>
+                        <td>^4</td>
+                        <td>CSS framework</td>
+                    </tr>
+                    <tr>
+                        <td><code>@tailwindcss/postcss</code></td>
+                        <td>^4</td>
+                        <td>PostCSS plugin</td>
+                    </tr>
+                    <tr>
+                        <td><code>eslint</code></td>
+                        <td>^9</td>
+                        <td>Code linting</td>
+                    </tr>
+                    <tr>
+                        <td><code>eslint-config-next</code></td>
+                        <td>16.1.6</td>
+                        <td>Next.js ESLint rules</td>
+                    </tr>
+                    <tr>
+                        <td><code>@types/node</code></td>
+                        <td>^20</td>
+                        <td>Node.js types</td>
+                    </tr>
+                    <tr>
+                        <td><code>@types/react</code></td>
+                        <td>^19</td>
+                        <td>React types</td>
+                    </tr>
+                    <tr>
+                        <td><code>@types/react-dom</code></td>
+                        <td>^19</td>
+                        <td>React DOM types</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Backend Dependencies (to be added)</h3>
+            <table class="dep-table">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>express</code></td>
+                        <td>^4.18</td>
+                        <td>Web framework</td>
+                    </tr>
+                    <tr>
+                        <td><code>cors</code></td>
+                        <td>^2.8</td>
+                        <td>CORS middleware</td>
+                    </tr>
+                    <tr>
+                        <td><code>helmet</code></td>
+                        <td>^7</td>
+                        <td>Security headers</td>
+                    </tr>
+                    <tr>
+                        <td><code>jsonwebtoken</code></td>
+                        <td>^9</td>
+                        <td>JWT handling</td>
+                    </tr>
+                    <tr>
+                        <td><code>bcryptjs</code></td>
+                        <td>^2.4</td>
+                        <td>Password hashing</td>
+                    </tr>
+                    <tr>
+                        <td><code>bullmq</code></td>
+                        <td>^4</td>
+                        <td>Job queues</td>
+                    </tr>
+                    <tr>
+                        <td><code>redis</code></td>
+                        <td>^4</td>
+                        <td>Redis client</td>
+                    </tr>
+                    <tr>
+                        <td><code>openai</code></td>
+                        <td>^4</td>
+                        <td>OpenAI SDK</td>
+                    </tr>
+                    <tr>
+                        <td><code>@anthropic-ai/sdk</code></td>
+                        <td>^0.20</td>
+                        <td>Claude SDK</td>
+                    </tr>
+                    <tr>
+                        <td><code>winston</code></td>
+                        <td>^3</td>
+                        <td>Logging</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="agents.html" style="color: var(--accent-2);">Next: AI Agents →</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

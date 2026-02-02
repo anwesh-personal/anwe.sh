@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - ANWE.SH</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent-1: #11998E;
+            --accent-2: #38EF7D;
+            --gradient: linear-gradient(135deg, #11998E, #38EF7D);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--accent-2);
+        }
+
+        .mermaid {
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        ul {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: var(--surface-2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-2);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .card h4 {
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+            border: 1px solid var(--accent-1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent-2);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Overview</a>
+
+        <h1>🏛️ System Architecture</h1>
+        <p class="subtitle">How all the pieces connect together to form the complete ANWE.SH platform</p>
+
+        <div class="section">
+            <h2>🌐 High-Level Architecture</h2>
+            <p>The system is designed as a modern, decoupled architecture with clear separation of concerns:</p>
+
+            <div class="mermaid">
+                graph TB
+                subgraph "Internet / Users"
+                U1[👤 Visitors]
+                U2[👨‍💼 Anwesh Admin]
+                end
+
+                subgraph "CDN Layer"
+                CF[Cloudflare / Vercel Edge]
+                end
+
+                subgraph "anwe.sh - Marketing Site"
+                direction TB
+                WEB[Next.js SSG/ISR<br />Vercel]
+                WEB --> |Static| PAGES[Pages]
+                WEB --> |ISR 60s| BLOG[Blog]
+                end
+
+                subgraph "app.anwe.sh - Admin Panel"
+                direction TB
+                APP[Next.js App<br />Admin Dashboard]
+                APP --> EDITOR[Blog Editor]
+                APP --> AGENTS[Agent Control]
+                APP --> ANALYTICS[Analytics]
+                APP --> SETTINGS[Settings]
+                end
+
+                subgraph "api.anwe.sh - Backend"
+                direction TB
+                API[Express.js API]
+                API --> AUTH[Auth Service]
+                API --> BLOG_API[Blog CRUD]
+                API --> AGENT_API[Agent Coordinator]
+                API --> WEBHOOK[Webhooks]
+                end
+
+                subgraph "AI Layer"
+                direction TB
+                ORA[🧠 ORA<br />Main AI Brain]
+                ORA --> WRITER[✍️ Writer Agent]
+                ORA --> IMAGER[🎨 Image Agent]
+                ORA --> SEO[📊 SEO Agent]
+                ORA --> SOCIAL[📱 Social Agent]
+                end
+
+                subgraph "Data Layer"
+                direction TB
+                SUPA[(Supabase<br />PostgreSQL)]
+                REDIS[(Redis<br />Queue/Cache)]
+                S3[(S3/Storage<br />Images)]
+                end
+
+                subgraph "External Services"
+                direction TB
+                OPENAI[OpenAI API]
+                CLAUDE[Claude API]
+                TWITTER[Twitter API]
+                LINKEDIN[LinkedIn API]
+                end
+
+                U1 --> CF
+                U2 --> CF
+                CF --> WEB
+                CF --> APP
+                CF --> API
+
+                WEB --> SUPA
+                APP --> API
+                API --> SUPA
+                API --> REDIS
+                API --> ORA
+
+                ORA --> OPENAI
+                ORA --> CLAUDE
+                WRITER --> SUPA
+                IMAGER --> S3
+                SOCIAL --> TWITTER
+                SOCIAL --> LINKEDIN
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Domain Routing Architecture</h2>
+
+            <div class="mermaid">
+                graph LR
+                subgraph "DNS - Namecheap/Cloudflare"
+                DNS[anwe.sh DNS]
+                end
+
+                subgraph "A Records"
+                A1["@ → 76.76.21.21 (Vercel)"]
+                A2["mail → VPS IP"]
+                end
+
+                subgraph "CNAME Records"
+                C1["www → cname.vercel-dns.com"]
+                C2["app → VPS or Vercel"]
+                C3["api → VPS IP"]
+                end
+
+                subgraph "Destinations"
+                D1[Vercel - Marketing Site]
+                D2[VPS - Admin App]
+                D3[VPS - API Server]
+                D4[Zoho - Email]
+                end
+
+                DNS --> A1 --> D1
+                DNS --> A2 --> D4
+                DNS --> C1 --> D1
+                DNS --> C2 --> D2
+                DNS --> C3 --> D3
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4>anwe.sh (Marketing)</h4>
+                    <ul>
+                        <li>Hosted on <strong>Vercel</strong></li>
+                        <li>Static generation + ISR</li>
+                        <li>Edge-cached globally</li>
+                        <li>Auto SSL via Let's Encrypt</li>
+                        <li>Git-push deploys</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>app.anwe.sh (Admin)</h4>
+                    <ul>
+                        <li>Hosted on <strong>VPS or Vercel</strong></li>
+                        <li>Protected by auth</li>
+                        <li>Full CRUD for content</li>
+                        <li>Agent management UI</li>
+                        <li>Analytics dashboard</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>api.anwe.sh (Backend)</h4>
+                    <ul>
+                        <li>Hosted on <strong>VPS</strong></li>
+                        <li>Express.js + Node.js</li>
+                        <li>Handles all API requests</li>
+                        <li>Agent coordination</li>
+                        <li>Webhook receivers</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>mail.anwe.sh (Email)</h4>
+                    <ul>
+                        <li>MX records → Zoho</li>
+                        <li>Professional email</li>
+                        <li>anwesh@anwe.sh</li>
+                        <li>Can trigger automations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏗️ Component Architecture</h2>
+
+            <h3>Marketing Site (anwe.sh)</h3>
+            <div class="mermaid">
+                graph TB
+                subgraph "Next.js App Router"
+                LAYOUT[layout.tsx<br />Root Layout]
+                LAYOUT --> HOME[page.tsx<br />Home]
+                LAYOUT --> BLOGLIST[blog/page.tsx<br />Blog Listing]
+                LAYOUT --> BLOGPOST[blog/slug/page.tsx<br />Single Post]
+                end
+
+                subgraph "Components"
+                NAV[Navigation]
+                HERO[Hero]
+                STATS[Stats]
+                EXPERTISE[Expertise]
+                JOURNEY[Journey]
+                CTA[CTA]
+                FOOTER[Footer]
+                end
+
+                subgraph "Data Sources"
+                SUPA[(Supabase)]
+                end
+
+                HOME --> NAV
+                HOME --> HERO
+                HOME --> STATS
+                HOME --> EXPERTISE
+                HOME --> JOURNEY
+                HOME --> CTA
+                HOME --> FOOTER
+
+                BLOGLIST --> SUPA
+                BLOGPOST --> SUPA
+            </div>
+
+            <h3>Admin Panel (app.anwe.sh)</h3>
+            <div class="mermaid">
+                graph TB
+                subgraph "Admin App"
+                AUTH_GUARD[Auth Guard]
+                AUTH_GUARD --> DASH[Dashboard]
+                AUTH_GUARD --> POSTS[Posts Manager]
+                AUTH_GUARD --> AGENT_UI[Agent Control]
+                AUTH_GUARD --> ANALYTICS[Analytics]
+                AUTH_GUARD --> SETTINGS[Settings]
+                end
+
+                subgraph "Posts Manager"
+                LIST[Post List]
+                EDITOR[Rich Text Editor]
+                PREVIEW[Live Preview]
+                PUBLISH[Publish Controls]
+                end
+
+                subgraph "Agent Control"
+                AGENT_STATUS[Agent Status]
+                TRIGGER[Manual Triggers]
+                LOGS[Activity Logs]
+                CONFIG[Agent Config]
+                end
+
+                POSTS --> LIST
+                POSTS --> EDITOR
+                POSTS --> PREVIEW
+                POSTS --> PUBLISH
+
+                AGENT_UI --> AGENT_STATUS
+                AGENT_UI --> TRIGGER
+                AGENT_UI --> LOGS
+                AGENT_UI --> CONFIG
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Authentication Flow</h2>
+
+            <div class="mermaid">
+                sequenceDiagram
+                participant U as User
+                participant APP as app.anwe.sh
+                participant API as api.anwe.sh
+                participant SUPA as Supabase Auth
+
+                U->>APP: Access admin
+                APP->>SUPA: Check session
+                alt No Session
+                SUPA-->>APP: Not authenticated
+                APP->>U: Redirect to login
+                U->>APP: Enter credentials
+                APP->>SUPA: Sign in
+                SUPA-->>APP: JWT Token
+                APP->>APP: Store in cookie
+                else Has Session
+                SUPA-->>APP: Valid session
+                end
+                APP->>API: Request with JWT
+                API->>SUPA: Verify JWT
+                SUPA-->>API: User data + role
+                API-->>APP: Protected data
+                APP->>U: Render dashboard
+            </div>
+
+            <div class="highlight-box">
+                <h4>Security Notes</h4>
+                <ul>
+                    <li>JWT tokens stored in HTTP-only cookies</li>
+                    <li>Supabase RLS protects database access</li>
+                    <li>API validates every request</li>
+                    <li>Admin routes protected by middleware</li>
+                    <li>Rate limiting on all endpoints</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📦 Request/Response Flow</h2>
+
+            <div class="mermaid">
+                sequenceDiagram
+                participant V as Visitor
+                participant VE as Vercel Edge
+                participant NEXT as Next.js
+                participant SUPA as Supabase
+                participant CACHE as Edge Cache
+
+                V->>VE: GET anwe.sh/blog
+                VE->>CACHE: Check cache
+                alt Cache Hit
+                CACHE-->>VE: Cached HTML
+                VE-->>V: Fast response (< 50ms) else Cache Miss VE->>NEXT: Generate page
+                    NEXT->>SUPA: Fetch posts
+                    SUPA-->>NEXT: Posts data
+                    NEXT->>NEXT: Render HTML
+                    NEXT-->>VE: Generated HTML
+                    VE->>CACHE: Store (60s TTL)
+                    VE-->>V: Response
+                    end
+
+                    Note over VE,CACHE: ISR: Revalidate every 60s
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p><a href="flowchart.html" style="color: var(--accent-2);">Next: Data Flow & Workflows →</a></p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#11998E',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38EF7D',
+                lineColor: '#38EF7D',
+                secondaryColor: '#1a1a1a',
+                tertiaryColor: '#111111'
+            }
+        });
+    </script>
+</body>
+
+</html>
