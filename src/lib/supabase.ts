@@ -318,3 +318,45 @@ export function calculateReadingTime(content: string): string {
     const minutes = Math.ceil(words / wordsPerMinute);
     return `${minutes} min`;
 }
+
+// =====================================================
+// SITE SETTINGS (Global Theme etc.)
+// =====================================================
+
+import type { ThemeName } from './themes';
+
+// Get global site theme
+export async function getGlobalTheme(): Promise<ThemeName> {
+    const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'theme')
+        .single();
+
+    if (error || !data) {
+        return 'emerald-night'; // Default fallback
+    }
+
+    return data.value as ThemeName;
+}
+
+// Set global site theme (admin only)
+export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase
+        .from('site_settings')
+        .upsert({
+            key: 'theme',
+            value: theme,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'key'
+        });
+
+    if (error) {
+        console.error('Error setting global theme:', error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
