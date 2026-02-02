@@ -1,12 +1,15 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getAllPosts, getPostBySlug } from '@/lib/mock-posts';
+import { getAllPosts, getPostBySlug } from '@/lib/supabase';
 import { Navigation } from '@/components/marketing/Navigation';
 import { Footer } from '@/components/marketing/Footer';
 
+// Revalidate every 60 seconds
+export const revalidate = 60;
+
 // Generate static params for all posts
 export async function generateStaticParams() {
-    const posts = getAllPosts();
+    const posts = await getAllPosts();
     return posts.map((post) => ({
         slug: post.slug,
     }));
@@ -15,21 +18,21 @@ export async function generateStaticParams() {
 // Generate metadata for each post
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const post = getPostBySlug(slug);
+    const post = await getPostBySlug(slug);
 
     if (!post) {
         return { title: 'Post Not Found' };
     }
 
     return {
-        title: `${post.title} | Anwesh Rath`,
-        description: post.excerpt,
+        title: post.meta_title || `${post.title} | Anwesh Rath`,
+        description: post.meta_description || post.excerpt,
     };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const post = getPostBySlug(slug);
+    const post = await getPostBySlug(slug);
 
     if (!post) {
         notFound();
@@ -47,9 +50,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <span className="post-category">{post.category}</span>
                     <h1 className="post-title">{post.title}</h1>
                     <div className="post-meta">
-                        <span>{post.publishedAt}</span>
+                        <span>{post.published_at ? new Date(post.published_at).toLocaleDateString() : ''}</span>
                         <span>·</span>
-                        <span>{post.readingTime} read</span>
+                        <span>{post.reading_time} read</span>
                     </div>
                 </header>
 
@@ -92,30 +95,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     );
 }
 
-// Simple markdown parser (basic - can upgrade to remark/rehype later)
+// Simple markdown parser
 function parseMarkdown(content: string): string {
     return content
-        // Headers
         .replace(/^### (.*$)/gim, '<h3>$1</h3>')
         .replace(/^## (.*$)/gim, '<h2>$1</h2>')
         .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        // Bold
-        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-        // Italic
-        .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        // Links
+        .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/gim, '<em>$1</em>')
         .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>')
-        // Lists
         .replace(/^- (.*$)/gim, '<li>$1</li>')
-        // Horizontal rule
         .replace(/^---$/gim, '<hr />')
-        // Paragraphs
-        .replace(/\n\n/gim, '</p><p>')
-        // Wrap in paragraph
-        .replace(/^(.+)$/gim, (match) => {
-            if (match.startsWith('<h') || match.startsWith('<li') || match.startsWith('<hr') || match.startsWith('<p>') || match.startsWith('</p>')) {
-                return match;
-            }
-            return match;
-        });
+        .replace(/\n\n/gim, '</p><p>');
 }
