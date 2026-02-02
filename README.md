@@ -1,198 +1,36 @@
-# 🚀 Vanilla Multi-Tenant AI SaaS Template
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A complete, production-ready multi-tenant SaaS application template with AI integration, token wallet system, super admin functionality, and everything you need to build a robust SaaS platform.
+## Getting Started
 
-## ✨ Features
+First, run the development server:
 
-- **Multi-Tenant Architecture** - Complete tenant isolation with RLS policies
-- **Authentication & Authorization** - JWT-based auth with role-based access control
-- **Token Wallet System** - Flexible token/credit management with policies and ledger
-- **AI Provider Integration** - OpenAI, Anthropic, Google AI with failover support
-- **Super Admin Dashboard** - Complete admin panel for platform management
-- **5 Brand Kits with Themes** - Modern Minimal, Tech Bold, Elegant Classic, Creative Playful, Corporate Professional
-- **Dark/Light Mode** - Full dark mode support for all brand kits
-- **Custom Typography** - Distinct fonts for each brand kit (Inter, Space Grotesk, Playfair Display, Poppins, Roboto)
-- **RESTful API** - Express.js backend with comprehensive endpoints
-- **React Frontend** - Modern React app with context-based state management
-- **Database Migrations** - PostgreSQL schema with Supabase/PostgREST
-- **Queue System** - Background job processing with Bull/Redis
-- **API Key Management** - Secure API key generation and validation
-
-## 📁 Project Structure
-
-```
-vanilla-saas-template/
-├── backend/                 # Express.js API server
-│   ├── src/
-│   │   ├── config/         # Configuration files
-│   │   ├── controllers/    # Route controllers
-│   │   ├── middleware/     # Auth, tenant isolation, etc.
-│   │   ├── models/         # Database models
-│   │   ├── services/       # Business logic
-│   │   ├── utils/          # Helper functions
-│   │   └── routes/         # API routes
-│   ├── package.json
-│   └── .env.example
-├── frontend/               # React application
-│   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utilities
-│   ├── package.json
-│   └── vite.config.js
-├── database/                # Database migrations
-│   ├── migrations/         # SQL migration files
-│   └── seeds/              # Seed data
-├── docs/                    # Documentation
-│   ├── SETUP.md            # Setup guide
-│   ├── API.md              # API documentation
-│   ├── ARCHITECTURE.md     # Architecture overview
-│   └── DEPLOYMENT.md       # Deployment guide
-└── docker-compose.yml      # Docker setup
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm/pnpm
-- PostgreSQL 14+ (or Supabase)
-- Redis (for queue system)
-- Git
-
-### Installation
-
-1. **Clone and setup:**
 ```bash
-cd vanilla-saas-template
-```
-
-2. **Backend setup:**
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env with your database and API keys
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-3. **Frontend setup:**
-```bash
-cd frontend
-npm install
-cp .env.example .env
-# Edit .env with your API URL
-npm run dev
-```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-4. **Database setup:**
-```bash
-# Run migrations (see database/README.md)
-psql -U postgres -d your_database < database/migrations/001_initial_schema.sql
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 📚 Documentation
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-- [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
-- [API Documentation](./docs/API.md) - Complete API reference
-- [Architecture](./docs/ARCHITECTURE.md) - System architecture
-- [Theme Guide](./docs/THEME_GUIDE.md) - Complete theme and brand kit guide
-- [Theme Mockups](./docs/THEME_MOCKUPS.md) - Visual mockups of all themes
-- [Audit Report](./AUDIT_REPORT.md) - Complete feature audit
-- [Audit Summary](./AUDIT_SUMMARY.md) - What's included summary
-- [Improvements](./IMPROVEMENTS.md) - Recommended improvements
-- [Database Migrations](./database/migrations/README.md) - Migration guide
-- [Deployment](./docs/DEPLOYMENT.md) - Production deployment
+## Learn More
 
-## 🏗️ Core Components
+To learn more about Next.js, take a look at the following resources:
 
-### Multi-Tenancy
-- Tenant isolation at database level (RLS)
-- Tenant context middleware
-- Tenant-specific configurations
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### Token Wallet
-- Token allocation policies
-- Usage tracking and ledger
-- Monthly/lifetime allocation modes
-- Token reservation system
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### AI Providers
-- OpenAI integration
-- Anthropic Claude integration
-- Google Gemini integration
-- Provider failover and load balancing
-- Token usage tracking
+## Deploy on Vercel
 
-### Super Admin
-- User management
-- Tenant management
-- System configuration
-- Analytics and monitoring
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Design System
-- 5 distinct brand kits with unique identities
-- Dark/Light mode for each theme
-- Custom typography per brand kit
-- Theme switcher component
-- Visual mockups and showcase page
-
-### Engine System
-- AI engine deployment and management
-- Engine assignments (user/level/tier)
-- User-specific engine copies
-- Engine API keys
-- Engine execution tracking
-
-### Workflow System
-- Custom workflow definitions
-- Workflow execution engine
-- Workflow templates
-- Quality gates and validation
-- Execution history
-
-### Level System
-- Granular feature control
-- Level pricing management
-- Level restrictions
-- Level benefits
-- Upgrade paths
-- Feature usage tracking
-- Level analytics
-
-### Routing System
-- Multiple routing strategies (round-robin, least-loaded, health-based, etc.)
-- Worker registry and health monitoring
-- Routing metrics
-- Worker event logging
-- Load balancing
-
-### Orchestration System
-- Multi-agent communication
-- Resource allocation
-- Performance metrics
-- System monitoring
-
-## 🔐 Security
-
-- JWT-based authentication
-- Row Level Security (RLS) policies
-- API key encryption
-- Rate limiting
-- CORS configuration
-- Input validation and sanitization
-
-## 📝 License
-
-MIT License - feel free to use this template for your projects!
-
-## 🤝 Contributing
-
-This is a template project. Feel free to fork and customize for your needs.
-
----
-
-**Built with ❤️ for the SaaS community**
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
