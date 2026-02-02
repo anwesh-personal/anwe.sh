@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anwesh Rath - Systems Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* EDITORIAL DARK - Optikka-inspired with Deep Ocean colors */
+        :root {
+            --bg-dark: #0a1318;
+            --bg-mid: #0f1a20;
+            --bg-card: #142028;
+            --teal: #0d9488;
+            --cyan: #22d3ee;
+            --cyan-light: #67e8f9;
+            --text-primary: #e8eef2;
+            --text-secondary: #8a9aa4;
+            --text-muted: #566570;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Smooth scroll hint */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ===================== NAVIGATION ===================== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 19, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--cyan);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--cyan);
+        }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            position: relative;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+        }
+
+        .hero-tag::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 5.5rem;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -3px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title .line-2 {
+            color: var(--cyan);
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            max-width: 450px;
+            margin-bottom: 3rem;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--cyan);
+            color: var(--bg-dark);
+            padding: 1.1rem 2.2rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            background: var(--cyan-light);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(34, 211, 238, 0.2);
+        }
+
+        .hero-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated mesh background */
+        .mesh-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(13, 148, 136, 0.08) 0%, transparent 50%);
+        }
+
+        /* Abstract visual */
+        .visual-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        .orbital {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+        }
+
+        .orbital-1 {
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            animation: spin 60s linear infinite;
+        }
+
+        .orbital-2 {
+            width: 75%;
+            height: 75%;
+            transform: translate(-50%, -50%);
+            animation: spin 45s linear infinite reverse;
+        }
+
+        .orbital-3 {
+            width: 50%;
+            height: 50%;
+            transform: translate(-50%, -50%);
+            border-color: rgba(34, 211, 238, 0.2);
+            animation: spin 30s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .core {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--teal), var(--cyan));
+            border-radius: 50%;
+            box-shadow:
+                0 0 60px rgba(34, 211, 238, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .node-1 {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .node-2 {
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+
+        .node-3 {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .node-4 {
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        /* ===================== STATS BAR ===================== */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item {
+            padding: 3rem 2rem;
+            border-right: 1px solid var(--border);
+            text-align: center;
+            transition: background 0.4s ease;
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-item:hover {
+            background: var(--bg-mid);
+        }
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 500;
+            color: var(--cyan);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ===================== EXPERTISE GRID ===================== */
+        .expertise {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            border-top: 1px solid var(--border);
+        }
+
+        .expertise-header {
+            padding: 4rem 3rem;
+            border-right: 1px solid var(--border);
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        .section-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .expertise-card {
+            padding: 3rem;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            transition: background 0.4s ease;
+        }
+
+        .expertise-card:nth-child(even) {
+            border-right: none;
+        }
+
+        .expertise-card:hover {
+            background: var(--bg-mid);
+        }
+
+        .expertise-icon {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .expertise-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .expertise-desc {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== CTA ===================== */
+        .cta {
+            padding: 10rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(34, 211, 238, 0.05) 0%, transparent 60%);
+        }
+
+        .cta-content {
+            position: relative;
+        }
+
+        .cta-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+        }
+
+        .cta-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--cyan);
+            color: var(--bg-dark);
+            padding: 1.2rem 2.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            background: var(--cyan-light);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(34, 211, 238, 0.25);
+        }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            padding: 3rem 4rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .footer-logo span {
+            color: var(--cyan);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--cyan);
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-left {
+                padding: 8rem 2rem 4rem;
+                border-right: none;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .hero-right {
+                min-height: 50vh;
+                border-top: 1px solid var(--border);
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat-item:nth-child(2) {
+                border-right: none;
+            }
+
+            .expertise {
+                grid-template-columns: 1fr;
+            }
+
+            .expertise-header {
+                position: static;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .expertise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .expertise-card {
+                border-right: none;
+            }
+
+            nav {
+                padding: 1.5rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .cta-title {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Anwe<span>.</span>sh</div>
+        <ul class="nav-links">
+            <li><a href="#expertise">Expertise</a></li>
+            <li><a href="#journey">Journey</a></li>
+            <li><a href="#contact">Connect</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="hero-tag">Systems Architect</div>
+            <h1 class="hero-title">
+                <span class="line-1">Anwesh</span><br>
+                <span class="line-2">Rath</span>
+            </h1>
+            <p class="hero-subtitle">
+                17+ years architecting enterprise solutions, AI systems, and automation that transforms how businesses
+                operate and scale.
+            </p>
+            <a href="#contact" class="hero-cta">
+                Let's Talk
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+        <div class="hero-right">
+            <div class="mesh-bg"></div>
+            <div class="visual-container">
+                <div class="orbital orbital-1">
+                    <div class="node node-1"></div>
+                    <div class="node node-2"></div>
+                </div>
+                <div class="orbital orbital-2">
+                    <div class="node node-3"></div>
+                    <div class="node node-4"></div>
+                </div>
+                <div class="orbital orbital-3"></div>
+                <div class="core"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-number">17+</div>
+            <div class="stat-label">Years</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Systems Built</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">$M+</div>
+            <div class="stat-label">Revenue</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Problems Solved</div>
+        </div>
+    </section>
+
+    <!-- Expertise -->
+    <section class="expertise" id="expertise">
+        <div class="expertise-header">
+            <div class="section-tag">What I Build</div>
+            <h2 class="section-title">End-to-End Systems</h2>
+        </div>
+        <div class="expertise-grid">
+            <div class="expertise-card">
+                <div class="expertise-icon">🏗️</div>
+                <h3 class="expertise-title">Enterprise SaaS</h3>
+                <p class="expertise-desc">Multi-tenant platforms built for scale, security, and performance.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">🤖</div>
+                <h3 class="expertise-title">AI & Automation</h3>
+                <p class="expertise-desc">Intelligent workflows and AI agents that deliver measurable ROI.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">📈</div>
+                <h3 class="expertise-title">Sales Systems</h3>
+                <p class="expertise-desc">Funnels and email architecture that convert at scale.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">🧠</div>
+                <h3 class="expertise-title">NLP & Psychology</h3>
+                <p class="expertise-desc">Human behavior insights applied to UX and persuasion.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+        <div class="cta-content">
+            <h2 class="cta-title">Let's Build Something</h2>
+            <p class="cta-subtitle">Have an enterprise challenge? Let's architect the solution together.</p>
+            <a href="mailto:hello@anwe.sh" class="cta-btn">
+                Start a Conversation
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Anwe<span>.</span>sh</div>
+        <div class="footer-links">
+            <a href="#">LinkedIn</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <div class="footer-copy">© 2024</div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anwesh Rath - Systems Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* EDITORIAL WARM - Optikka-inspired */
+        :root {
+            --cream: #f5f0e8;
+            --cream-dark: #ebe4d8;
+            --charcoal: #1a1a1a;
+            --charcoal-soft: #2d2d2d;
+            --accent: #c45c3e;
+            --accent-light: #d97856;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --text-muted: #999999;
+            --border: rgba(26, 26, 26, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--cream);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ===================== NAVIGATION ===================== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            mix-blend-mode: difference;
+        }
+
+        .logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: white;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            position: relative;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 4rem;
+            padding-bottom: 6rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .hero-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 500;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title span {
+            display: block;
+        }
+
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Abstract geometric visual */
+        .abstract-shape {
+            width: 280px;
+            height: 280px;
+            position: relative;
+        }
+
+        .shape-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .ring-1 {
+            width: 100%;
+            height: 100%;
+            border-color: var(--accent);
+            opacity: 0.3;
+            animation: rotate 30s linear infinite;
+        }
+
+        .ring-2 {
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-color: var(--charcoal);
+            opacity: 0.2;
+            animation: rotate 25s linear infinite reverse;
+        }
+
+        .ring-3 {
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            border-color: var(--accent);
+            animation: rotate 20s linear infinite;
+        }
+
+        .shape-core {
+            position: absolute;
+            width: 40%;
+            height: 40%;
+            top: 30%;
+            left: 30%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hero-desc {
+            padding: 3rem 4rem;
+        }
+
+        .hero-desc p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            max-width: 400px;
+        }
+
+        .hero-desc p span {
+            color: var(--accent);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            right: 4rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            writing-mode: vertical-rl;
+        }
+
+        /* ===================== GRID SECTION ===================== */
+        .grid-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--border);
+        }
+
+        .grid-item {
+            padding: 4rem 2.5rem;
+            border-right: 1px solid var(--border);
+            transition: background 0.4s ease;
+        }
+
+        .grid-item:last-child {
+            border-right: none;
+        }
+
+        .grid-item:hover {
+            background: var(--cream-dark);
+        }
+
+        .grid-number {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .grid-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .grid-desc {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== ABOUT SECTION ===================== */
+        .about {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border);
+        }
+
+        .about-left {
+            padding: 6rem 4rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .section-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        .about-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 500;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+        }
+
+        .about-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .about-right {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+        }
+
+        .timeline-item {
+            padding: 3rem 4rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            transition: background 0.4s ease;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-item:hover {
+            background: var(--cream-dark);
+        }
+
+        .timeline-year {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--accent);
+            min-width: 100px;
+        }
+
+        .timeline-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== CTA SECTION ===================== */
+        .cta {
+            background: var(--charcoal);
+            color: white;
+            padding: 8rem 4rem;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            color: var(--charcoal);
+            padding: 1.2rem 2.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            padding: 3rem 4rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-left {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8rem 2rem 4rem;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .hero-right {
+                min-height: 50vh;
+            }
+
+            .grid-section {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-item:nth-child(2) {
+                border-right: none;
+            }
+
+            .about {
+                grid-template-columns: 1fr;
+            }
+
+            .about-left {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            nav {
+                padding: 1.5rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Anwe.sh</div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#work">How It Works</a></li>
+            <li><a href="#contact">Connect</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="hero-tag">Systems Architect</div>
+            <h1 class="hero-title">
+                <span>Meet</span>
+                <span>Anwesh</span>
+            </h1>
+        </div>
+        <div class="hero-right">
+            <div class="hero-visual">
+                <div class="abstract-shape">
+                    <div class="shape-ring ring-1"></div>
+                    <div class="shape-ring ring-2"></div>
+                    <div class="shape-ring ring-3"></div>
+                    <div class="shape-core"></div>
+                </div>
+            </div>
+            <div class="hero-desc">
+                <p>Redefining how enterprises build, scale, and automate — unlocking your <span>full potential</span>.
+                </p>
+            </div>
+            <div class="scroll-indicator">Scroll Down</div>
+        </div>
+    </section>
+
+    <!-- Grid Section -->
+    <section class="grid-section">
+        <div class="grid-item">
+            <div class="grid-number">01</div>
+            <h3 class="grid-title">Enterprise SaaS</h3>
+            <p class="grid-desc">Full-stack architecture for multi-tenant platforms that scale.</p>
+        </div>
+        <div class="grid-item">
+            <div class="grid-number">02</div>
+            <h3 class="grid-title">AI Systems</h3>
+            <p class="grid-desc">Intelligent automation that delivers measurable ROI.</p>
+        </div>
+        <div class="grid-item">
+            <div class="grid-number">03</div>
+            <h3 class="grid-title">Sales Architecture</h3>
+            <p class="grid-desc">Funnels and conversion systems that turn traffic into revenue.</p>
+        </div>
+        <div class="grid-item">
+            <div class="grid-number">04</div>
+            <h3 class="grid-title">Product Strategy</h3>
+            <p class="grid-desc">From concept to market-fit with precision positioning.</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-left">
+            <div class="section-tag">The Journey</div>
+            <h2 class="about-title">17 years of building what enterprises need</h2>
+            <p class="about-text">
+                From Microsoft to founding companies, from email marketing to AI-powered enterprise solutions.
+                I combine NLP, psychology, tech, and sales into systems that don't just work — they dominate.
+            </p>
+        </div>
+        <div class="about-right">
+            <div class="timeline-item">
+                <div class="timeline-year">2007</div>
+                <div class="timeline-content">
+                    <h4>The Beginning</h4>
+                    <p>Started architecting systems at Microsoft scale</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">Now</div>
+                <div class="timeline-content">
+                    <h4>AI Era Architect</h4>
+                    <p>Enterprise SaaS, automation, and money-making systems</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+        <h2 class="cta-title">Let's Build</h2>
+        <p class="cta-subtitle">Have an enterprise challenge? Let's architect the solution together.</p>
+        <a href="mailto:hello@anwe.sh" class="cta-btn">
+            Start a Conversation
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Anwe.sh</div>
+        <div class="footer-links">
+            <a href="#">LinkedIn</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <div class="footer-copy">© 2024</div>
+    </footer>
+</body>
+
+</html>

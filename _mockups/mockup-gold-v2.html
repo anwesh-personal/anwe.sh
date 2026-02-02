@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anwesh Rath - Systems Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* GOLD LUXURY - Ultra premium with serif typography */
+        :root {
+            --black: #0a0a0a;
+            --charcoal: #141414;
+            --dark-gray: #1f1f1f;
+            --gold: #c9a961;
+            --gold-light: #dcc07a;
+            --gold-bright: #e8d48a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-gold: rgba(201, 169, 97, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ===================== NAVIGATION ===================== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 2rem 5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        .nav-cta {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--gold);
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 4rem;
+        }
+
+        /* Ambient glow */
+        .ambient {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201, 169, 97, 0.08) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 3rem;
+        }
+
+        .hero-tag::before,
+        .hero-tag::after {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 7rem;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -2px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title span {
+            display: block;
+            color: var(--gold);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--black);
+            background: var(--gold);
+            padding: 1.25rem 3rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            background: var(--gold-light);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(201, 169, 97, 0.2);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+        }
+
+        .scroll-hint span {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--gold), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                height: 60px;
+            }
+
+            50% {
+                opacity: 1;
+                height: 80px;
+            }
+        }
+
+        /* ===================== EXPERTISE SECTION ===================== */
+        .expertise {
+            padding: 8rem 5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 500;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--border);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .expertise-card {
+            background: var(--black);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .expertise-card:hover {
+            background: var(--charcoal);
+        }
+
+        .expertise-card:hover .expertise-icon {
+            transform: scale(1.1);
+            color: var(--gold);
+        }
+
+        .expertise-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s ease;
+        }
+
+        .expertise-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .expertise-desc {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== STATS SECTION ===================== */
+        .stats {
+            padding: 6rem 5rem;
+            background: var(--charcoal);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem;
+            font-weight: 500;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ===================== JOURNEY ===================== */
+        .journey {
+            padding: 8rem 5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .journey-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .journey-left {
+            position: sticky;
+            top: 8rem;
+            height: fit-content;
+        }
+
+        .journey-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 500;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .journey-intro {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-year {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--gold);
+        }
+
+        .timeline-content h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== CTA ===================== */
+        .cta {
+            padding: 10rem 5rem;
+            text-align: center;
+            background: linear-gradient(180deg, var(--black) 0%, var(--charcoal) 100%);
+            position: relative;
+        }
+
+        .cta .ambient {
+            opacity: 0.5;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .cta-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 5rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            padding: 3rem 5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .footer-logo span {
+            color: var(--gold);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold);
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 4.5rem;
+            }
+
+            .expertise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .journey-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .journey-left {
+                position: static;
+            }
+
+            nav {
+                padding: 1.5rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero,
+            .expertise,
+            .journey,
+            .cta {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Anwe<span>.</span>sh</div>
+        <ul class="nav-links">
+            <li><a href="#expertise">Expertise</a></li>
+            <li><a href="#journey">Journey</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#contact" class="nav-cta">Let's Talk</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="ambient"></div>
+        <div class="hero-content">
+            <div class="hero-tag">Systems Architect</div>
+            <h1 class="hero-title">
+                Anwesh
+                <span>Rath</span>
+            </h1>
+            <p class="hero-subtitle">
+                17 years architecting enterprise solutions, AI systems, and automation that transforms how businesses
+                scale and dominate.
+            </p>
+            <a href="#expertise" class="hero-cta">
+                Discover More
+            </a>
+        </div>
+        <div class="scroll-hint">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Expertise -->
+    <section class="expertise" id="expertise">
+        <div class="section-header">
+            <div class="section-tag">What I Build</div>
+            <h2 class="section-title">Areas of Mastery</h2>
+        </div>
+        <div class="expertise-grid">
+            <div class="expertise-card">
+                <div class="expertise-icon">🏗️</div>
+                <h3 class="expertise-title">Enterprise SaaS</h3>
+                <p class="expertise-desc">Architecture for multi-tenant platforms that scale to millions.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">🤖</div>
+                <h3 class="expertise-title">AI Systems</h3>
+                <p class="expertise-desc">Intelligent automation that delivers measurable ROI.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">📈</div>
+                <h3 class="expertise-title">Sales Architecture</h3>
+                <p class="expertise-desc">Funnels and systems that convert at enterprise scale.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">🎯</div>
+                <h3 class="expertise-title">Product Strategy</h3>
+                <p class="expertise-desc">From concept to market-fit with precision positioning.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">⚡</div>
+                <h3 class="expertise-title">Automation</h3>
+                <p class="expertise-desc">End-to-end systems that eliminate manual work.</p>
+            </div>
+            <div class="expertise-card">
+                <div class="expertise-icon">🧠</div>
+                <h3 class="expertise-title">NLP & Psychology</h3>
+                <p class="expertise-desc">Human behavior insights for UX and persuasion.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">17+</div>
+                <div class="stat-label">Years</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Systems</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">$M+</div>
+                <div class="stat-label">Revenue</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Impact</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey -->
+    <section class="journey" id="journey">
+        <div class="journey-grid">
+            <div class="journey-left">
+                <div class="section-tag">The Path</div>
+                <h2 class="journey-title">17 Years of Building</h2>
+                <p class="journey-intro">From enterprise roots to founding companies to AI-era architecture.</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2007</div>
+                    <div class="timeline-content">
+                        <h4>The Foundation</h4>
+                        <p>Started architecting systems at enterprise scale. Learned what it takes to build for
+                            millions.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">MSFT</div>
+                    <div class="timeline-content">
+                        <h4>Enterprise Scale</h4>
+                        <p>Worked with one of the world's largest tech companies. Systems that serve billions.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">Founder</div>
+                    <div class="timeline-content">
+                        <h4>Built My Own</h4>
+                        <p>Started companies. Mastered email marketing, product creation, sales funnels, and
+                            copywriting.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">Now</div>
+                    <div class="timeline-content">
+                        <h4>AI Era Architect</h4>
+                        <p>Combining 17 years of NLP, psychology, tech, and sales into enterprise AI solutions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+        <div class="ambient"></div>
+        <div class="cta-content">
+            <h2 class="cta-title">Let's Build</h2>
+            <p class="cta-subtitle">Have an enterprise challenge? Let's architect the solution together.</p>
+            <a href="mailto:hello@anwe.sh" class="hero-cta">
+                Start a Conversation
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Anwe<span>.</span>sh</div>
+        <div class="footer-links">
+            <a href="#">LinkedIn</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <div class="footer-copy">© 2024</div>
+    </footer>
+</body>
+
+</html>

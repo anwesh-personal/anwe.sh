@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anwesh Rath - Systems Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* GOLD MINIMAL - Clean sans-serif, asymmetric layout */
+        :root {
+            --black: #0a0a0a;
+            --charcoal: #111111;
+            --dark: #1a1a1a;
+            --gold: #b8964c;
+            --gold-light: #d4b56a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ===================== NAVIGATION ===================== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 4rem;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 4rem;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 4rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .eyebrow-line {
+            width: 40px;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .eyebrow-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1.05;
+            letter-spacing: -3px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title .highlight {
+            color: var(--gold);
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 420px;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--black);
+            background: var(--gold);
+            padding: 1rem 2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            background: var(--gold-light);
+            transform: translateX(5px);
+        }
+
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 4rem;
+        }
+
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: baseline;
+            gap: 2rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-number {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--gold);
+            min-width: 140px;
+            letter-spacing: -2px;
+        }
+
+        .stat-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ===================== EXPERTISE ===================== */
+        .expertise {
+            padding: 8rem 4rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .section-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4rem;
+        }
+
+        .section-title-wrap {
+            max-width: 500px;
+        }
+
+        .section-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 400px;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .expertise-card {
+            background: var(--black);
+            padding: 2.5rem;
+            transition: background 0.4s ease;
+        }
+
+        .expertise-card:hover {
+            background: var(--charcoal);
+        }
+
+        .card-number {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ===================== JOURNEY HORIZONTAL ===================== */
+        .journey {
+            padding: 6rem 4rem;
+            background: var(--charcoal);
+            overflow: hidden;
+        }
+
+        .journey-track {
+            display: flex;
+            gap: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .journey-item {
+            flex: 1;
+            padding: 2rem 3rem;
+            border-left: 1px solid var(--border);
+            position: relative;
+        }
+
+        .journey-item:first-child {
+            border-left: none;
+        }
+
+        .journey-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -1px;
+            width: 2px;
+            height: 40px;
+            background: var(--gold);
+        }
+
+        .journey-item:first-child::before {
+            display: none;
+        }
+
+        .journey-year {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .journey-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .journey-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ===================== CTA ===================== */
+        .cta {
+            padding: 10rem 4rem;
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-title span {
+            color: var(--gold);
+        }
+
+        .cta-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+        }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            padding: 2rem 4rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .footer-logo span {
+            color: var(--gold);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold);
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 8rem 2rem 4rem;
+            }
+
+            .hero-left {
+                border-right: none;
+                padding-right: 0;
+                padding-bottom: 4rem;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .hero-right {
+                padding-left: 0;
+                padding-top: 4rem;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .expertise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .journey-track {
+                flex-direction: column;
+            }
+
+            .journey-item {
+                border-left: none;
+                border-top: 1px solid var(--border);
+                padding: 2rem 0;
+            }
+
+            .journey-item::before {
+                top: -1px;
+                left: 0;
+                width: 40px;
+                height: 2px;
+            }
+
+            nav {
+                padding: 1.5rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">anwe<span>.</span>sh</div>
+            <ul class="nav-links">
+                <li><a href="#expertise">Expertise</a></li>
+                <li><a href="#journey">Journey</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="hero-eyebrow">
+                <div class="eyebrow-line"></div>
+                <span class="eyebrow-text">Systems Architect</span>
+            </div>
+            <h1 class="hero-title">
+                I build what<br>
+                <span class="highlight">others can't.</span>
+            </h1>
+            <p class="hero-desc">
+                17 years architecting enterprise solutions, AI systems, and automation that transforms how businesses
+                operate.
+            </p>
+            <a href="#contact" class="hero-cta">
+                Let's Talk
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+        <div class="hero-right">
+            <div class="stats-list">
+                <div class="stat-row">
+                    <div class="stat-number">17+</div>
+                    <div class="stat-content">
+                        <h4>Years Experience</h4>
+                        <p>From Microsoft to founding companies to AI-era architecture.</p>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-content">
+                        <h4>Systems Built</h4>
+                        <p>Enterprise SaaS, automation, sales funnels, and money-making machines.</p>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-number">$M+</div>
+                    <div class="stat-content">
+                        <h4>Revenue Generated</h4>
+                        <p>For clients and personal ventures across multiple industries.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expertise -->
+    <section class="expertise" id="expertise">
+        <div class="section-container">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-eyebrow">What I Build</div>
+                    <h2 class="section-title">End-to-End Systems</h2>
+                </div>
+                <p class="section-desc">Combining NLP, psychology, tech, and sales into solutions that dominate.</p>
+            </div>
+            <div class="expertise-grid">
+                <div class="expertise-card">
+                    <div class="card-number">01</div>
+                    <h3 class="card-title">Enterprise SaaS</h3>
+                    <p class="card-desc">Multi-tenant platforms built for scale, security, and performance.</p>
+                </div>
+                <div class="expertise-card">
+                    <div class="card-number">02</div>
+                    <h3 class="card-title">AI Systems</h3>
+                    <p class="card-desc">Intelligent automation and agents that deliver measurable ROI.</p>
+                </div>
+                <div class="expertise-card">
+                    <div class="card-number">03</div>
+                    <h3 class="card-title">Sales Architecture</h3>
+                    <p class="card-desc">Funnels and conversion systems that turn traffic into revenue.</p>
+                </div>
+                <div class="expertise-card">
+                    <div class="card-number">04</div>
+                    <h3 class="card-title">Product Strategy</h3>
+                    <p class="card-desc">From concept to market-fit with precision positioning.</p>
+                </div>
+                <div class="expertise-card">
+                    <div class="card-number">05</div>
+                    <h3 class="card-title">Automation</h3>
+                    <p class="card-desc">End-to-end systems that eliminate manual work at scale.</p>
+                </div>
+                <div class="expertise-card">
+                    <div class="card-number">06</div>
+                    <h3 class="card-title">NLP & Psychology</h3>
+                    <p class="card-desc">Human behavior insights for UX, copy, and persuasion.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey -->
+    <section class="journey" id="journey">
+        <div class="journey-track">
+            <div class="journey-item">
+                <div class="journey-year">2007</div>
+                <h3 class="journey-title">The Beginning</h3>
+                <p class="journey-desc">Started architecting systems at enterprise scale.</p>
+            </div>
+            <div class="journey-item">
+                <div class="journey-year">MICROSOFT</div>
+                <h3 class="journey-title">Enterprise Scale</h3>
+                <p class="journey-desc">Systems that serve billions of users worldwide.</p>
+            </div>
+            <div class="journey-item">
+                <div class="journey-year">FOUNDER</div>
+                <h3 class="journey-title">Built My Own</h3>
+                <p class="journey-desc">Companies, products, funnels, and email marketing mastery.</p>
+            </div>
+            <div class="journey-item">
+                <div class="journey-year">NOW</div>
+                <h3 class="journey-title">AI Era Architect</h3>
+                <p class="journey-desc">Enterprise AI, SaaS, and money-making systems.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+        <div class="cta-content">
+            <h2 class="cta-title">Let's <span>Build</span></h2>
+            <p class="cta-desc">Have an enterprise challenge? Let's architect the solution together.</p>
+            <a href="mailto:hello@anwe.sh" class="hero-cta">
+                Start a Conversation
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">anwe<span>.</span>sh</div>
+        <div class="footer-links">
+            <a href="#">LinkedIn</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+    </footer>
+</body>
+
+</html>
