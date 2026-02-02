@@ -1,5 +1,6 @@
 -- Site Settings Table
 -- Stores global site configuration including theme
+
 CREATE TABLE IF NOT EXISTS site_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     key TEXT UNIQUE NOT NULL,
@@ -10,6 +11,11 @@ CREATE TABLE IF NOT EXISTS site_settings (
 
 -- Enable RLS
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first (idempotent)
+DROP POLICY IF EXISTS "Anyone can read site settings" ON site_settings;
+DROP POLICY IF EXISTS "Authenticated users can update site settings" ON site_settings;
+DROP POLICY IF EXISTS "Authenticated users can insert site settings" ON site_settings;
 
 -- Everyone can read site settings
 CREATE POLICY "Anyone can read site settings" ON site_settings

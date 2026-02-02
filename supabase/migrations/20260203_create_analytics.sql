@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS page_views (
 -- Enable RLS
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Authenticated users can read page views" ON page_views;
+DROP POLICY IF EXISTS "Allow anonymous inserts" ON page_views;
+
 -- Policies - only authenticated can read, anyone can insert (for tracking)
 CREATE POLICY "Authenticated users can read page views" ON page_views
     FOR SELECT USING (auth.role() = 'authenticated');
@@ -60,7 +64,7 @@ CREATE POLICY "Allow anonymous inserts" ON page_views
 -- Indexes for analytics queries
 CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path);
 CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(date(created_at));
+CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views((timezone('UTC', created_at)::date));
 CREATE INDEX IF NOT EXISTS idx_page_views_visitor ON page_views(visitor_hash, created_at);
 CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);
 CREATE INDEX IF NOT EXISTS idx_page_views_post ON page_views(post_id) WHERE post_id IS NOT NULL;
@@ -105,6 +109,10 @@ CREATE TABLE IF NOT EXISTS analytics_daily (
 
 -- Enable RLS
 ALTER TABLE analytics_daily ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Authenticated users can read analytics" ON analytics_daily;
+DROP POLICY IF EXISTS "Only service can write analytics" ON analytics_daily;
 
 CREATE POLICY "Authenticated users can read analytics" ON analytics_daily
     FOR SELECT USING (auth.role() = 'authenticated');

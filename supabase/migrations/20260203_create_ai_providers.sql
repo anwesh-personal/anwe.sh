@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS ai_providers (
     updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX idx_ai_providers_type ON ai_providers(provider_type);
-CREATE INDEX idx_ai_providers_active ON ai_providers(is_active);
-CREATE INDEX idx_ai_providers_priority ON ai_providers(provider_type, priority);
+CREATE INDEX IF NOT EXISTS idx_ai_providers_type ON ai_providers(provider_type);
+CREATE INDEX IF NOT EXISTS idx_ai_providers_active ON ai_providers(is_active);
+CREATE INDEX IF NOT EXISTS idx_ai_providers_priority ON ai_providers(provider_type, priority);
 
 -- =====================================================
 -- 2. AI MODELS METADATA
@@ -67,9 +67,9 @@ CREATE TABLE IF NOT EXISTS ai_models (
     UNIQUE(provider_id, model_id)
 );
 
-CREATE INDEX idx_ai_models_provider_id ON ai_models(provider_id);
-CREATE INDEX idx_ai_models_type ON ai_models(provider_type);
-CREATE INDEX idx_ai_models_active ON ai_models(is_active);
+CREATE INDEX IF NOT EXISTS idx_ai_models_provider_id ON ai_models(provider_id);
+CREATE INDEX IF NOT EXISTS idx_ai_models_type ON ai_models(provider_type);
+CREATE INDEX IF NOT EXISTS idx_ai_models_active ON ai_models(is_active);
 
 -- =====================================================
 -- 3. AI EXECUTIONS (Usage tracking)
@@ -110,11 +110,11 @@ CREATE TABLE IF NOT EXISTS ai_executions (
     completed_at timestamptz
 );
 
-CREATE INDEX idx_ai_executions_provider_id ON ai_executions(provider_id);
-CREATE INDEX idx_ai_executions_model_id ON ai_executions(model_id);
-CREATE INDEX idx_ai_executions_agent_id ON ai_executions(agent_id);
-CREATE INDEX idx_ai_executions_status ON ai_executions(status);
-CREATE INDEX idx_ai_executions_created_at ON ai_executions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_executions_provider_id ON ai_executions(provider_id);
+CREATE INDEX IF NOT EXISTS idx_ai_executions_model_id ON ai_executions(model_id);
+CREATE INDEX IF NOT EXISTS idx_ai_executions_agent_id ON ai_executions(agent_id);
+CREATE INDEX IF NOT EXISTS idx_ai_executions_status ON ai_executions(status);
+CREATE INDEX IF NOT EXISTS idx_ai_executions_created_at ON ai_executions(created_at DESC);
 
 -- =====================================================
 -- 4. ROW LEVEL SECURITY
@@ -122,6 +122,15 @@ CREATE INDEX idx_ai_executions_created_at ON ai_executions(created_at DESC);
 ALTER TABLE ai_providers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_models ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_executions ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Allow authenticated read ai_providers" ON ai_providers;
+DROP POLICY IF EXISTS "Service role manages ai_providers" ON ai_providers;
+DROP POLICY IF EXISTS "Allow authenticated read ai_models" ON ai_models;
+DROP POLICY IF EXISTS "Service role manages ai_models" ON ai_models;
+DROP POLICY IF EXISTS "Allow authenticated read ai_executions" ON ai_executions;
+DROP POLICY IF EXISTS "Allow authenticated insert ai_executions" ON ai_executions;
+DROP POLICY IF EXISTS "Service role manages ai_executions" ON ai_executions;
 
 -- Providers - authenticated can read (but API keys are excluded in queries)
 CREATE POLICY "Allow authenticated read ai_providers" ON ai_providers

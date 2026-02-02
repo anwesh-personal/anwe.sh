@@ -38,13 +38,13 @@ CREATE TABLE IF NOT EXISTS heatmap_events (
 );
 
 -- Partition by date for performance (events can be millions)
-CREATE INDEX idx_heatmap_events_session ON heatmap_events(session_id);
-CREATE INDEX idx_heatmap_events_page ON heatmap_events(page_path);
-CREATE INDEX idx_heatmap_events_type ON heatmap_events(event_type);
-CREATE INDEX idx_heatmap_events_created ON heatmap_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_heatmap_events_session ON heatmap_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_heatmap_events_page ON heatmap_events(page_path);
+CREATE INDEX IF NOT EXISTS idx_heatmap_events_type ON heatmap_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_heatmap_events_created ON heatmap_events(created_at DESC);
 
 -- Composite index for common queries
-CREATE INDEX idx_heatmap_events_page_type ON heatmap_events(page_path, event_type);
+CREATE INDEX IF NOT EXISTS idx_heatmap_events_page_type ON heatmap_events(page_path, event_type);
 
 -- =====================================================
 -- 2. SESSION RECORDINGS (Metadata only)
@@ -104,10 +104,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     last_activity_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX idx_sessions_visitor ON sessions(visitor_id);
-CREATE INDEX idx_sessions_started ON sessions(started_at DESC);
-CREATE INDEX idx_sessions_converted ON sessions(converted) WHERE converted = true;
-CREATE INDEX idx_sessions_device ON sessions(device_type);
+CREATE INDEX IF NOT EXISTS idx_sessions_visitor ON sessions(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sessions_converted ON sessions(converted) WHERE converted = true;
+CREATE INDEX IF NOT EXISTS idx_sessions_device ON sessions(device_type);
 
 -- =====================================================
 -- 3. LEADS
@@ -156,11 +156,11 @@ CREATE TABLE IF NOT EXISTS leads (
     converted_at timestamptz
 );
 
-CREATE INDEX idx_leads_email ON leads(email);
-CREATE INDEX idx_leads_status ON leads(status);
-CREATE INDEX idx_leads_score ON leads(ai_score DESC);
-CREATE INDEX idx_leads_created ON leads(created_at DESC);
-CREATE INDEX idx_leads_classification ON leads(ai_classification);
+CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+CREATE INDEX IF NOT EXISTS idx_leads_score ON leads(ai_score DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_classification ON leads(ai_classification);
 
 -- =====================================================
 -- 4. HEATMAP AGGREGATES
@@ -186,8 +186,8 @@ CREATE TABLE IF NOT EXISTS heatmap_aggregates (
     UNIQUE(page_path, event_type, date, device_type)
 );
 
-CREATE INDEX idx_heatmap_agg_page ON heatmap_aggregates(page_path);
-CREATE INDEX idx_heatmap_agg_date ON heatmap_aggregates(date DESC);
+CREATE INDEX IF NOT EXISTS idx_heatmap_agg_page ON heatmap_aggregates(page_path);
+CREATE INDEX IF NOT EXISTS idx_heatmap_agg_date ON heatmap_aggregates(date DESC);
 
 -- =====================================================
 -- 5. RLS POLICIES
@@ -196,6 +196,17 @@ ALTER TABLE heatmap_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE heatmap_aggregates ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Allow public insert heatmap_events" ON heatmap_events;
+DROP POLICY IF EXISTS "Allow authenticated read heatmap_events" ON heatmap_events;
+DROP POLICY IF EXISTS "Allow public insert sessions" ON sessions;
+DROP POLICY IF EXISTS "Allow public update sessions" ON sessions;
+DROP POLICY IF EXISTS "Allow authenticated read sessions" ON sessions;
+DROP POLICY IF EXISTS "Allow authenticated all leads" ON leads;
+DROP POLICY IF EXISTS "Allow public insert leads" ON leads;
+DROP POLICY IF EXISTS "Allow authenticated read heatmap_aggregates" ON heatmap_aggregates;
+DROP POLICY IF EXISTS "Service role manages heatmap_aggregates" ON heatmap_aggregates;
 
 -- Heatmap events - public insert (tracking), authenticated read
 CREATE POLICY "Allow public insert heatmap_events" ON heatmap_events
@@ -259,6 +270,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS heatmap_event_update_session ON heatmap_events;
 CREATE TRIGGER heatmap_event_update_session
     AFTER INSERT ON heatmap_events
     FOR EACH ROW
@@ -285,6 +297,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_leads_updated_at ON leads;
 CREATE TRIGGER update_leads_updated_at
     BEFORE UPDATE ON leads
     FOR EACH ROW

@@ -54,10 +54,10 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 -- =====================================================
 -- INDEXES
 -- =====================================================
-CREATE INDEX idx_blog_posts_slug ON blog_posts(slug);
-CREATE INDEX idx_blog_posts_published ON blog_posts(published, published_at DESC);
-CREATE INDEX idx_blog_posts_category ON blog_posts(category);
-CREATE INDEX idx_blog_posts_featured ON blog_posts(featured) WHERE featured = TRUE;
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published, published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_category ON blog_posts(category);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_featured ON blog_posts(featured) WHERE featured = TRUE;
 
 -- =====================================================
 -- UPDATED_AT TRIGGER
@@ -70,6 +70,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
 CREATE TRIGGER update_blog_posts_updated_at
     BEFORE UPDATE ON blog_posts
     FOR EACH ROW
@@ -79,6 +80,10 @@ CREATE TRIGGER update_blog_posts_updated_at
 -- ROW LEVEL SECURITY
 -- =====================================================
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Public can read published posts" ON blog_posts;
+DROP POLICY IF EXISTS "Service role has full access" ON blog_posts;
 
 -- Public can read published posts
 CREATE POLICY "Public can read published posts"

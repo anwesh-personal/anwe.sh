@@ -37,6 +37,10 @@ CREATE TABLE IF NOT EXISTS agent_runs (
 -- Enable RLS
 ALTER TABLE agent_runs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Authenticated users can read agent runs" ON agent_runs;
+DROP POLICY IF EXISTS "Authenticated users can manage agent runs" ON agent_runs;
+
 -- Policies
 CREATE POLICY "Authenticated users can read agent runs" ON agent_runs
     FOR SELECT USING (auth.role() = 'authenticated');
@@ -71,6 +75,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS agent_runs_update_stats ON agent_runs;
 CREATE TRIGGER agent_runs_update_stats
     AFTER UPDATE ON agent_runs
     FOR EACH ROW
