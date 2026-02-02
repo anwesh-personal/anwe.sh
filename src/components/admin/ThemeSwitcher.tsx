@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from '@/components/ThemeProvider';
-import { themes, type ThemeName } from '@/lib/themes';
+import { themes } from '@/lib/themes';
 
 export function ThemeSwitcher() {
     const { currentTheme, setTheme, availableThemes } = useTheme();

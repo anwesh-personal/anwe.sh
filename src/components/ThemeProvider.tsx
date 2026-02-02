@@ -28,25 +28,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         applyTheme(themeName);
     };
 
-    // Prevent flash of wrong theme
-    if (!mounted) {
-        return (
-            <div style={{ visibility: 'hidden' }}>
+    const contextValue = {
+        currentTheme,
+        theme: themes[currentTheme],
+        setTheme: handleSetTheme,
+        availableThemes: Object.keys(themes) as ThemeName[]
+    };
+
+    // Always provide context, but hide content until mounted to prevent theme flash
+    return (
+        <ThemeContext.Provider value={contextValue}>
+            <div style={mounted ? undefined : { visibility: 'hidden' }}>
                 {children}
             </div>
-        );
-    }
-
-    return (
-        <ThemeContext.Provider
-            value={{
-                currentTheme,
-                theme: themes[currentTheme],
-                setTheme: handleSetTheme,
-                availableThemes: Object.keys(themes) as ThemeName[]
-            }}
-        >
-            {children}
         </ThemeContext.Provider>
     );
 }
