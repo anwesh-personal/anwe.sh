@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/components/AuthProvider';
+import { AuthHandler } from '@/components/AuthHandler';
 import '../globals.css';
 import './login.css';
 
@@ -14,7 +15,9 @@ export default function LoginLayout({
 }) {
     return (
         <AuthProvider>
+            <AuthHandler />
             {children}
         </AuthProvider>
     );
 }
+
