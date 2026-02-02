@@ -97,3 +97,151 @@ export async function getFeaturedPosts(): Promise<BlogPost[]> {
 
     return data || [];
 }
+
+// =====================================================
+// ADMIN FUNCTIONS (require service role in production)
+// =====================================================
+
+// Get ALL posts (including drafts) for admin
+export async function getAllPostsAdmin(): Promise<BlogPost[]> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching all posts:', error);
+        return [];
+    }
+
+    return data || [];
+}
+
+// Get a single post by ID (for editing)
+export async function getPostById(id: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching post by ID:', error);
+        return null;
+    }
+
+    return data;
+}
+
+// Create a new post
+export async function createPost(post: Partial<BlogPost>): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .insert([post])
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error creating post:', error);
+        return null;
+    }
+
+    return data;
+}
+
+// Update a post
+export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+        .from('blog_posts')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating post:', error);
+        return null;
+    }
+
+    return data;
+}
+
+// Delete a post
+export async function deletePost(id: string): Promise<boolean> {
+    const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting post:', error);
+        return false;
+    }
+
+    return true;
+}
+
+// Publish a post
+export async function publishPost(id: string): Promise<BlogPost | null> {
+    return updatePost(id, {
+        published: true,
+        published_at: new Date().toISOString()
+    });
+}
+
+// Unpublish a post
+export async function unpublishPost(id: string): Promise<BlogPost | null> {
+    return updatePost(id, {
+        published: false
+    });
+}
+
+// Get dashboard stats
+export async function getDashboardStats() {
+    // Total posts
+    const { count: totalPosts } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true });
+
+    // Published posts
+    const { count: publishedPosts } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('published', true);
+
+    // Draft posts
+    const { count: draftPosts } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('published', false);
+
+    // Recent posts (last 5)
+    const { data: recentPosts } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, published, created_at, source, source_agent')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+    return {
+        totalPosts: totalPosts || 0,
+        publishedPosts: publishedPosts || 0,
+        draftPosts: draftPosts || 0,
+        recentPosts: recentPosts || []
+    };
+}
+
+// Generate slug from title
+export function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+}
+
+// Calculate reading time
+export function calculateReadingTime(content: string): string {
+    const wordsPerMinute = 200;
+    const words = content.split(/\s+/).length;
+    const minutes = Math.ceil(words / wordsPerMinute);
+    return `${minutes} min`;
+}
