@@ -8,6 +8,11 @@ export async function middleware(request: NextRequest) {
         },
     });
 
+    const hostname = request.headers.get('host') || '';
+    const isAppSubdomain = hostname.startsWith('app.');
+    const pathname = request.nextUrl.pathname;
+
+    // Create Supabase client for auth checks
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,23 +33,55 @@ export async function middleware(request: NextRequest) {
         }
     );
 
-    // Refresh session if expired
+    // Get session
     const { data: { session } } = await supabase.auth.getSession();
 
-    // Check if accessing admin routes
-    const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-    const isLoginPage = request.nextUrl.pathname === '/login';
+    // =========================================
+    // SUBDOMAIN ROUTING: app.anwe.sh
+    // =========================================
+    if (isAppSubdomain) {
+        // On app subdomain, redirect root to /admin
+        if (pathname === '/') {
+            return NextResponse.redirect(new URL('/admin', request.url));
+        }
 
-    // If accessing admin without session, redirect to login
-    if (isAdminRoute && !session) {
-        const redirectUrl = new URL('/login', request.url);
-        redirectUrl.searchParams.set('redirect', request.nextUrl.pathname);
-        return NextResponse.redirect(redirectUrl);
+        // Block marketing pages on app subdomain
+        const marketingPages = ['/blog', '/docs', '/about', '/contact'];
+        if (marketingPages.some(page => pathname.startsWith(page))) {
+            // Redirect to main domain for marketing pages
+            const mainUrl = new URL(pathname, 'https://anwe.sh');
+            return NextResponse.redirect(mainUrl);
+        }
+
+        // Admin routes require auth
+        if (pathname.startsWith('/admin')) {
+            if (!session) {
+                const redirectUrl = new URL('/login', request.url);
+                redirectUrl.searchParams.set('redirect', pathname);
+                return NextResponse.redirect(redirectUrl);
+            }
+        }
+
+        // Login page - redirect if already logged in
+        if (pathname === '/login' && session) {
+            return NextResponse.redirect(new URL('/admin', request.url));
+        }
+
+        return response;
     }
 
-    // If on login page with session, redirect to admin
-    if (isLoginPage && session) {
-        return NextResponse.redirect(new URL('/admin', request.url));
+    // =========================================
+    // MAIN DOMAIN ROUTING: anwe.sh
+    // =========================================
+
+    // On main domain, redirect /admin to app subdomain
+    if (pathname.startsWith('/admin')) {
+        return NextResponse.redirect(new URL(pathname, 'https://app.anwe.sh'));
+    }
+
+    // On main domain, redirect /login to app subdomain
+    if (pathname === '/login') {
+        return NextResponse.redirect(new URL('/login', 'https://app.anwe.sh'));
     }
 
     return response;
@@ -52,7 +89,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
+        '/',
         '/admin/:path*',
         '/login',
+        '/blog/:path*',
+        '/docs/:path*',
     ],
 };

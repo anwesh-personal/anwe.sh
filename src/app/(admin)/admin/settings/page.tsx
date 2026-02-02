@@ -4,7 +4,7 @@ import { AdminHeader } from '@/components/admin';
 import { ThemeSwitcher } from '@/components/admin/ThemeSwitcher';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/components/AuthProvider';
-import { createClientSupabase } from '@/lib/supabase-server';
+import { createClientSupabase } from '@/lib/supabase-client';
 import { useState } from 'react';
 
 export default function SettingsPage() {
