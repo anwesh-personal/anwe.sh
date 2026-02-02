@@ -1,131 +1,146 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { use, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin';
-import { getPostById, updatePost, deletePost, publishPost, unpublishPost, generateSlug, calculateReadingTime, type BlogPost } from '@/lib/supabase';
+import { BlockEditor, markdownToBlocks, blocksToMarkdown, createEmptyBlock } from '@/components/editor';
+import { getPostById, updatePost, generateSlug, calculateReadingTime, type BlogPost } from '@/lib/supabase';
+import type { Block } from '@/types';
 
-export default function EditPostPage() {
+interface EditPostPageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default function EditPostPage({ params }: EditPostPageProps) {
+    const { id } = use(params);
     const router = useRouter();
-    const params = useParams();
-    const postId = params.id as string;
-
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+    const [blocks, setBlocks] = useState<Block[]>([createEmptyBlock('paragraph')]);
     const [post, setPost] = useState<BlogPost | null>(null);
     const [form, setForm] = useState({
         title: '',
         slug: '',
         excerpt: '',
-        content: '',
         category: 'General',
         cover_image: '',
         meta_title: '',
         meta_description: '',
     });
 
+    // Load the post
     useEffect(() => {
-        async function loadPost() {
-            const data = await getPostById(postId);
-            if (data) {
-                setPost(data);
-                setForm({
-                    title: data.title,
-                    slug: data.slug,
-                    excerpt: data.excerpt || '',
-                    content: data.content,
-                    category: data.category,
-                    cover_image: data.cover_image || '',
-                    meta_title: data.meta_title || '',
-                    meta_description: data.meta_description || '',
-                });
+        const loadPost = async () => {
+            const data = await getPostById(id);
+            if (!data) {
+                router.push('/admin/posts');
+                return;
             }
-            setLoading(false);
-        }
-        loadPost();
-    }, [postId]);
 
-    const handleSave = async () => {
-        if (!form.title || !form.content) {
-            alert('Title and content are required');
+            setPost(data);
+            setForm({
+                title: data.title,
+                slug: data.slug,
+                excerpt: data.excerpt || '',
+                category: data.category || 'General',
+                cover_image: data.cover_image || '',
+                meta_title: data.meta_title || '',
+                meta_description: data.meta_description || '',
+            });
+
+            // Convert markdown content to blocks
+            if (data.content) {
+                const parsedBlocks = markdownToBlocks(data.content);
+                setBlocks(parsedBlocks.length > 0 ? parsedBlocks : [createEmptyBlock('paragraph')]);
+            }
+
+            setLoading(false);
+        };
+
+        loadPost();
+    }, [id, router]);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const title = e.target.value;
+        setForm(prev => ({
+            ...prev,
+            title,
+            // Only auto-update slug if it matches the old title's slug
+            slug: prev.slug === generateSlug(post?.title || '') ? generateSlug(title) : prev.slug
+        }));
+    };
+
+    const handleBlocksChange = useCallback((newBlocks: Block[]) => {
+        setBlocks(newBlocks);
+    }, []);
+
+    const handleSubmit = async (publish: boolean) => {
+        if (!form.title) {
+            alert('Title is required');
+            return;
+        }
+
+        const content = blocksToMarkdown(blocks);
+
+        if (!content.trim()) {
+            alert('Content is required');
             return;
         }
 
         setSaving(true);
 
-        const updated = await updatePost(postId, {
+        const updated = await updatePost(id, {
             title: form.title,
             slug: form.slug,
-            excerpt: form.excerpt || form.content.slice(0, 160) + '...',
-            content: form.content,
+            excerpt: form.excerpt || content.slice(0, 160).replace(/[#*_\n]/g, '') + '...',
+            content: content,
             category: form.category,
             cover_image: form.cover_image || null,
             meta_title: form.meta_title || form.title,
             meta_description: form.meta_description || form.excerpt,
-            reading_time: calculateReadingTime(form.content),
-            word_count: form.content.split(/\s+/).length,
+            reading_time: calculateReadingTime(content),
+            word_count: content.split(/\s+/).length,
+            published: publish,
+            published_at: publish && !post?.published_at ? new Date().toISOString() : post?.published_at,
         });
 
         setSaving(false);
 
         if (updated) {
-            setPost(updated);
-            alert('Saved!');
-        } else {
-            alert('Error saving post');
-        }
-    };
-
-    const handlePublish = async () => {
-        setSaving(true);
-        const updated = await publishPost(postId);
-        setSaving(false);
-        if (updated) {
-            setPost(updated);
-        }
-    };
-
-    const handleUnpublish = async () => {
-        setSaving(true);
-        const updated = await unpublishPost(postId);
-        setSaving(false);
-        if (updated) {
-            setPost(updated);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) {
-            return;
-        }
-
-        const success = await deletePost(postId);
-        if (success) {
             router.push('/admin/posts');
         } else {
-            alert('Error deleting post');
+            alert('Error updating post');
         }
     };
 
     if (loading) {
         return (
-            <div className="admin-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-                    <div style={{ color: 'var(--color-foreground-muted)' }}>Loading post...</div>
+            <>
+                <AdminHeader title="Loading..." subtitle="Please wait" />
+                <div className="admin-content">
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '300px'
+                    }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            border: '3px solid var(--color-border)',
+                            borderTopColor: 'var(--color-accent-solid)',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }} />
+                    </div>
                 </div>
-            </div>
-        );
-    }
-
-    if (!post) {
-        return (
-            <div className="admin-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>❌</div>
-                    <div style={{ color: 'var(--color-foreground-muted)' }}>Post not found</div>
-                </div>
-            </div>
+                <style jsx>{`
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `}</style>
+            </>
         );
     }
 
@@ -133,33 +148,48 @@ export default function EditPostPage() {
         <>
             <AdminHeader
                 title="Edit Post"
-                subtitle={post.published ? 'Published' : 'Draft'}
+                subtitle={`Editing: ${form.title || 'Untitled'}`}
                 actions={
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{
+                            display: 'flex',
+                            background: 'var(--color-background-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '2px'
+                        }}>
+                            <button
+                                className={`btn btn-sm ${activeTab === 'editor' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setActiveTab('editor')}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className={`btn btn-sm ${activeTab === 'preview' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setActiveTab('preview')}
+                            >
+                                Preview
+                            </button>
+                        </div>
                         <button
                             className="btn btn-secondary"
-                            onClick={handleSave}
+                            onClick={() => router.push('/admin/posts')}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => handleSubmit(false)}
                             disabled={saving}
                         >
-                            {saving ? 'Saving...' : 'Save'}
+                            Save Draft
                         </button>
-                        {post.published ? (
-                            <button
-                                className="btn btn-secondary"
-                                onClick={handleUnpublish}
-                                disabled={saving}
-                            >
-                                Unpublish
-                            </button>
-                        ) : (
-                            <button
-                                className="btn btn-primary"
-                                onClick={handlePublish}
-                                disabled={saving}
-                            >
-                                Publish
-                            </button>
-                        )}
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => handleSubmit(true)}
+                            disabled={saving}
+                        >
+                            {saving ? 'Saving...' : post?.published ? 'Update' : 'Publish'}
+                        </button>
                     </div>
                 }
             />
@@ -175,7 +205,7 @@ export default function EditPostPage() {
                                     type="text"
                                     placeholder="Post title..."
                                     value={form.title}
-                                    onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
+                                    onChange={handleTitleChange}
                                     style={{
                                         width: '100%',
                                         padding: '1rem',
@@ -191,38 +221,88 @@ export default function EditPostPage() {
                             </div>
                         </div>
 
-                        {/* Content */}
+                        {/* Content Editor */}
                         <div className="admin-card" style={{ flex: 1 }}>
                             <div className="admin-card-header">
                                 <h2 className="admin-card-title">Content</h2>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-foreground-muted)' }}>
-                                    {form.content.split(/\s+/).length} words • {calculateReadingTime(form.content)} read
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{
+                                        fontSize: '0.8rem',
+                                        color: 'var(--color-foreground-muted)',
+                                        background: 'var(--color-background-secondary)',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: 'var(--radius-sm)'
+                                    }}>
+                                        {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                                    </span>
+                                    {post?.source === 'ai' && (
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            padding: '0.25rem 0.5rem',
+                                            background: 'linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end))',
+                                            borderRadius: 'var(--radius-sm)',
+                                            color: 'white'
+                                        }}>
+                                            AI Generated
+                                        </span>
+                                    )}
+                                </div>
                             </div>
-                            <div className="admin-card-body" style={{ padding: 0 }}>
-                                <textarea
-                                    value={form.content}
-                                    onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
-                                    style={{
-                                        width: '100%',
-                                        minHeight: '500px',
-                                        padding: '1.5rem',
-                                        background: 'var(--color-background)',
-                                        border: 'none',
-                                        color: 'var(--color-foreground)',
-                                        fontSize: '0.95rem',
-                                        lineHeight: '1.8',
-                                        fontFamily: 'var(--font-mono)',
-                                        resize: 'vertical',
-                                        outline: 'none'
-                                    }}
-                                />
+                            <div className="admin-card-body" style={{ padding: '0 1rem 1rem' }}>
+                                {activeTab === 'editor' ? (
+                                    <BlockEditor
+                                        initialBlocks={blocks}
+                                        onChange={handleBlocksChange}
+                                        placeholder="Start writing your post..."
+                                    />
+                                ) : (
+                                    <div className="block-editor block-editor--readonly" style={{ padding: '1rem 0' }}>
+                                        <BlockEditor
+                                            initialBlocks={blocks}
+                                            readOnly
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* Status */}
+                        <div className="admin-card">
+                            <div className="admin-card-header">
+                                <h2 className="admin-card-title">Status</h2>
+                            </div>
+                            <div className="admin-card-body">
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.75rem',
+                                    background: 'var(--color-background)',
+                                    borderRadius: 'var(--radius-md)'
+                                }}>
+                                    <span style={{
+                                        width: '8px',
+                                        height: '8px',
+                                        borderRadius: '50%',
+                                        background: post?.published ? '#10b981' : '#f59e0b'
+                                    }} />
+                                    <span>{post?.published ? 'Published' : 'Draft'}</span>
+                                    {post?.published_at && (
+                                        <span style={{
+                                            marginLeft: 'auto',
+                                            fontSize: '0.8rem',
+                                            color: 'var(--color-foreground-muted)'
+                                        }}>
+                                            {new Date(post.published_at).toLocaleDateString()}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Slug */}
                         <div className="admin-card">
                             <div className="admin-card-header">
@@ -353,46 +433,59 @@ export default function EditPostPage() {
                             </div>
                         </div>
 
-                        {/* Meta */}
+                        {/* SEO */}
                         <div className="admin-card">
                             <div className="admin-card-header">
-                                <h2 className="admin-card-title">Post Info</h2>
-                            </div>
-                            <div className="admin-card-body" style={{ fontSize: '0.85rem', color: 'var(--color-foreground-secondary)' }}>
-                                <div style={{ marginBottom: '0.5rem' }}>
-                                    <strong>Created:</strong> {new Date(post.created_at).toLocaleString()}
-                                </div>
-                                <div style={{ marginBottom: '0.5rem' }}>
-                                    <strong>Updated:</strong> {new Date(post.updated_at).toLocaleString()}
-                                </div>
-                                {post.published_at && (
-                                    <div style={{ marginBottom: '0.5rem' }}>
-                                        <strong>Published:</strong> {new Date(post.published_at).toLocaleString()}
-                                    </div>
-                                )}
-                                <div>
-                                    <strong>Source:</strong> {post.source === 'manual' ? 'Manual' : `${post.source_agent || 'AI Agent'}`}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Danger Zone */}
-                        <div className="admin-card" style={{ borderColor: 'var(--color-error)' }}>
-                            <div className="admin-card-header" style={{ borderColor: 'var(--color-error)' }}>
-                                <h2 className="admin-card-title" style={{ color: 'var(--color-error)' }}>Danger Zone</h2>
+                                <h2 className="admin-card-title">SEO</h2>
                             </div>
                             <div className="admin-card-body">
-                                <button
-                                    onClick={handleDelete}
-                                    className="btn btn-secondary"
-                                    style={{
-                                        width: '100%',
-                                        borderColor: 'var(--color-error)',
-                                        color: 'var(--color-error)'
-                                    }}
-                                >
-                                    Delete Post
-                                </button>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.8rem',
+                                        color: 'var(--color-foreground-muted)',
+                                        marginBottom: '0.5rem'
+                                    }}>Meta Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder={form.title || 'Page title...'}
+                                        value={form.meta_title}
+                                        onChange={(e) => setForm(prev => ({ ...prev, meta_title: e.target.value }))}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.625rem',
+                                            background: 'var(--color-background)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--color-foreground)',
+                                            fontSize: '0.85rem'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.8rem',
+                                        color: 'var(--color-foreground-muted)',
+                                        marginBottom: '0.5rem'
+                                    }}>Meta Description</label>
+                                    <textarea
+                                        placeholder="Description for search engines..."
+                                        value={form.meta_description}
+                                        onChange={(e) => setForm(prev => ({ ...prev, meta_description: e.target.value }))}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '80px',
+                                            padding: '0.625rem',
+                                            background: 'var(--color-background)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--color-foreground)',
+                                            fontSize: '0.85rem',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

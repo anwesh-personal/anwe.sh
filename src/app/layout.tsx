@@ -81,6 +81,8 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { AnalyticsTracker } from '@/components/AnalyticsTracker';
+import { LeadCapture } from '@/components/LeadCapture';
 
 export default function RootLayout({
   children,
@@ -94,9 +96,17 @@ export default function RootLayout({
       >
         <ThemeProvider>
           {children}
+          {/* Analytics & Lead Capture - only on public pages */}
+          <AnalyticsTracker />
+          <LeadCapture
+            trigger="exit_intent"
+            title="Stay Connected"
+            subtitle="Get insights on AI systems and enterprise architecture delivered to your inbox."
+          />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
 

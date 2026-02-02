@@ -1,18 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin';
+import { BlockEditor, blocksToMarkdown, createEmptyBlock } from '@/components/editor';
 import { createPost, generateSlug, calculateReadingTime } from '@/lib/supabase';
+import type { Block } from '@/types';
 
 export default function NewPostPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+    const [blocks, setBlocks] = useState<Block[]>([createEmptyBlock('paragraph')]);
     const [form, setForm] = useState({
         title: '',
         slug: '',
         excerpt: '',
-        content: '',
         category: 'General',
         cover_image: '',
         meta_title: '',
@@ -28,9 +31,20 @@ export default function NewPostPage() {
         }));
     };
 
+    const handleBlocksChange = useCallback((newBlocks: Block[]) => {
+        setBlocks(newBlocks);
+    }, []);
+
     const handleSubmit = async (publish: boolean) => {
-        if (!form.title || !form.content) {
-            alert('Title and content are required');
+        if (!form.title) {
+            alert('Title is required');
+            return;
+        }
+
+        const content = blocksToMarkdown(blocks);
+
+        if (!content.trim()) {
+            alert('Content is required');
             return;
         }
 
@@ -39,14 +53,14 @@ export default function NewPostPage() {
         const post = await createPost({
             title: form.title,
             slug: form.slug,
-            excerpt: form.excerpt || form.content.slice(0, 160) + '...',
-            content: form.content,
+            excerpt: form.excerpt || content.slice(0, 160).replace(/[#*_\n]/g, '') + '...',
+            content: content,
             category: form.category,
             cover_image: form.cover_image || null,
             meta_title: form.meta_title || form.title,
             meta_description: form.meta_description || form.excerpt,
-            reading_time: calculateReadingTime(form.content),
-            word_count: form.content.split(/\s+/).length,
+            reading_time: calculateReadingTime(content),
+            word_count: content.split(/\s+/).length,
             published: publish,
             published_at: publish ? new Date().toISOString() : null,
             source: 'manual',
@@ -66,9 +80,28 @@ export default function NewPostPage() {
         <>
             <AdminHeader
                 title="New Post"
-                subtitle="Create a new blog post"
+                subtitle="Create a new blog post with the block editor"
                 actions={
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{
+                            display: 'flex',
+                            background: 'var(--color-background-secondary)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '2px'
+                        }}>
+                            <button
+                                className={`btn btn-sm ${activeTab === 'editor' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setActiveTab('editor')}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className={`btn btn-sm ${activeTab === 'preview' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setActiveTab('preview')}
+                            >
+                                Preview
+                            </button>
+                        </div>
                         <button
                             className="btn btn-secondary"
                             onClick={() => handleSubmit(false)}
@@ -114,51 +147,45 @@ export default function NewPostPage() {
                             </div>
                         </div>
 
-                        {/* Content */}
+                        {/* Content Editor */}
                         <div className="admin-card" style={{ flex: 1 }}>
                             <div className="admin-card-header">
                                 <h2 className="admin-card-title">Content</h2>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-foreground-muted)' }}>
-                                    Markdown supported
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{
+                                        fontSize: '0.8rem',
+                                        color: 'var(--color-foreground-muted)',
+                                        background: 'var(--color-background-secondary)',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: 'var(--radius-sm)'
+                                    }}>
+                                        {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                                    </span>
+                                    <button className="btn btn-ghost btn-sm" style={{
+                                        background: 'linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end))',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        fontWeight: '600'
+                                    }}>
+                                        ✨ AI Assist
+                                    </button>
+                                </div>
                             </div>
-                            <div className="admin-card-body" style={{ padding: 0 }}>
-                                <textarea
-                                    placeholder="Write your post content here...
-
-# Heading 1
-## Heading 2
-
-**Bold text** and *italic text*
-
-- Bullet points
-- Like this
-
-1. Numbered lists
-2. Work too
-
-> Blockquotes for emphasis
-
-```javascript
-// Code blocks with syntax highlighting
-const hello = 'world';
-```"
-                                    value={form.content}
-                                    onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
-                                    style={{
-                                        width: '100%',
-                                        minHeight: '500px',
-                                        padding: '1.5rem',
-                                        background: 'var(--color-background)',
-                                        border: 'none',
-                                        color: 'var(--color-foreground)',
-                                        fontSize: '0.95rem',
-                                        lineHeight: '1.8',
-                                        fontFamily: 'var(--font-mono)',
-                                        resize: 'vertical',
-                                        outline: 'none'
-                                    }}
-                                />
+                            <div className="admin-card-body" style={{ padding: '0 1rem 1rem' }}>
+                                {activeTab === 'editor' ? (
+                                    <BlockEditor
+                                        initialBlocks={blocks}
+                                        onChange={handleBlocksChange}
+                                        placeholder="Start writing your post... Press + to add blocks or just start typing."
+                                    />
+                                ) : (
+                                    <div className="block-editor block-editor--readonly" style={{ padding: '1rem 0' }}>
+                                        <BlockEditor
+                                            initialBlocks={blocks}
+                                            readOnly
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
