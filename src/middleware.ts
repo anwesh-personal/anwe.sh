@@ -11,6 +11,21 @@ export async function middleware(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
     const isAppSubdomain = hostname.startsWith('app.');
     const pathname = request.nextUrl.pathname;
+    const searchParams = request.nextUrl.searchParams;
+    const hash = request.headers.get('x-url-hash') || '';
+
+    // NEVER redirect if there are auth tokens in the URL
+    // These need to be processed by the client
+    const hasAuthTokens =
+        searchParams.has('token_hash') ||
+        searchParams.has('code') ||
+        searchParams.has('access_token') ||
+        searchParams.has('error_description');
+
+    if (hasAuthTokens) {
+        // Let the request through - client will handle auth
+        return response;
+    }
 
     // Create Supabase client for auth checks
     const supabase = createServerClient(
@@ -40,15 +55,18 @@ export async function middleware(request: NextRequest) {
     // SUBDOMAIN ROUTING: app.anwe.sh
     // =========================================
     if (isAppSubdomain) {
-        // On app subdomain, redirect root to /admin
+        // On app subdomain, redirect root to /admin (only if logged in)
         if (pathname === '/') {
-            return NextResponse.redirect(new URL('/admin', request.url));
+            if (session) {
+                return NextResponse.redirect(new URL('/admin', request.url));
+            } else {
+                return NextResponse.redirect(new URL('/login', request.url));
+            }
         }
 
         // Block marketing pages on app subdomain
         const marketingPages = ['/blog', '/docs', '/about', '/contact'];
         if (marketingPages.some(page => pathname.startsWith(page))) {
-            // Redirect to main domain for marketing pages
             const mainUrl = new URL(pathname, 'https://anwe.sh');
             return NextResponse.redirect(mainUrl);
         }
@@ -92,6 +110,7 @@ export const config = {
         '/',
         '/admin/:path*',
         '/login',
+        '/auth/:path*',
         '/blog/:path*',
         '/docs/:path*',
     ],
