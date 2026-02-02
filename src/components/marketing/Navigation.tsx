@@ -3,21 +3,24 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 gsap.registerPlugin(ScrollToPlugin);
 
 const navLinks = [
-    { href: '#expertise', label: 'Expertise' },
-    { href: '#journey', label: 'Journey' },
+    { href: '/#expertise', label: 'Expertise' },
+    { href: '/#journey', label: 'Journey' },
     { href: '/blog', label: 'Insights' },
-    { href: '#contact', label: 'Contact' },
+    { href: '/#contact', label: 'Contact' },
 ];
 
 export function Navigation() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
 
     useEffect(() => {
         const handleScroll = () => {
@@ -52,12 +55,16 @@ export function Navigation() {
     }, [isMenuOpen]);
 
     const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-        if (!href.startsWith('#')) return;
+        // Only do smooth scroll on home page for anchor links
+        if (!isHomePage || !href.includes('#')) return;
+
+        const hash = href.split('#')[1];
+        if (!hash) return;
 
         e.preventDefault();
         setIsMenuOpen(false);
 
-        const target = document.querySelector(href);
+        const target = document.querySelector(`#${hash}`);
 
         if (target) {
             gsap.to(window, {
@@ -105,9 +112,9 @@ export function Navigation() {
                 </ul>
 
                 <Link
-                    href="#contact"
+                    href="/#contact"
                     className="nav-cta desktop-only"
-                    onClick={(e) => handleSmoothScroll(e, '#contact')}
+                    onClick={(e) => handleSmoothScroll(e, '/#contact')}
                 >
                     Let&apos;s Talk
                 </Link>
@@ -140,9 +147,9 @@ export function Navigation() {
                     ))}
                 </ul>
                 <Link
-                    href="#contact"
+                    href="/#contact"
                     className="mobile-cta"
-                    onClick={(e) => handleSmoothScroll(e, '#contact')}
+                    onClick={(e) => handleSmoothScroll(e, '/#contact')}
                 >
                     Let&apos;s Talk
                 </Link>
