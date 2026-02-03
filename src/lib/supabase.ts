@@ -1,11 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Server-side client (for API routes and server components)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Lazy-initialized server-side client
+let _supabase: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+    if (!_supabase) {
+        _supabase = createClient(supabaseUrl, supabaseAnonKey);
+    }
+    return _supabase;
+}
+
+// Legacy export for backwards compatibility
+export const supabase = {
+    from: (table: string) => getSupabase().from(table),
+    rpc: (fn: string, params?: Record<string, unknown>) => getSupabase().rpc(fn, params),
+    auth: {
+        get signInWithPassword() { return getSupabase().auth.signInWithPassword.bind(getSupabase().auth); },
+        get signOut() { return getSupabase().auth.signOut.bind(getSupabase().auth); },
+        get getSession() { return getSupabase().auth.getSession.bind(getSupabase().auth); },
+        get getUser() { return getSupabase().auth.getUser.bind(getSupabase().auth); },
+        get updateUser() { return getSupabase().auth.updateUser.bind(getSupabase().auth); }
+    },
+    storage: { from: (bucket: string) => getSupabase().storage.from(bucket) }
+};
 
 // Browser client (for client components)
 export function createClientComponentClient() {
