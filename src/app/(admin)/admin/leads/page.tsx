@@ -2,23 +2,38 @@
 
 /**
  * Leads Admin Page
- * View and manage captured leads with AI scoring
+ * View, filter, and manage leads captured from the site
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { AdminHeader } from '@/components/admin';
 import { getLeads, updateLead, getLeadStats, type Lead } from '@/lib/heatmap';
-import { format } from 'date-fns';
 
-type LeadFilter = 'all' | 'hot' | 'warm' | 'cold' | 'new';
-type StatusFilter = 'all' | 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+type StatusFilter = 'all' | 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'spam';
+type ClassificationFilter = 'all' | 'hot' | 'warm' | 'cold' | 'spam';
+
+const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+    new: { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', label: 'New' },
+    contacted: { color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', label: 'Contacted' },
+    qualified: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', label: 'Qualified' },
+    converted: { color: '#059669', bg: 'rgba(5, 150, 105, 0.15)', label: 'Converted' },
+    lost: { color: '#6b7280', bg: 'rgba(107, 114, 128, 0.15)', label: 'Lost' },
+    spam: { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', label: 'Spam' }
+};
+
+const CLASSIFICATION_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
+    hot: { icon: '🔥', color: '#ef4444', label: 'Hot' },
+    warm: { icon: '☀️', color: '#f59e0b', label: 'Warm' },
+    cold: { icon: '❄️', color: '#3b82f6', label: 'Cold' },
+    spam: { icon: '🚫', color: '#6b7280', label: 'Spam' }
+};
 
 export default function LeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
-    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [loading, setLoading] = useState(true);
-    const [classificationFilter, setClassificationFilter] = useState<LeadFilter>('all');
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+    const [classificationFilter, setClassificationFilter] = useState<ClassificationFilter>('all');
+    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [stats, setStats] = useState({
         total: 0,
         new: 0,
@@ -31,78 +46,78 @@ export default function LeadsPage() {
 
     const loadData = useCallback(async () => {
         setLoading(true);
-
-        const [leadsData, statsData] = await Promise.all([
-            getLeads({
-                limit: 100,
-                classification: classificationFilter === 'all' ? undefined : classificationFilter,
-                status: statusFilter === 'all' ? undefined : statusFilter
-            }),
-            getLeadStats()
-        ]);
-
-        setLeads(leadsData);
-        setStats(statsData);
-        setLoading(false);
-    }, [classificationFilter, statusFilter]);
+        try {
+            const [leadsData, statsData] = await Promise.all([
+                getLeads({
+                    limit: 100,
+                    status: statusFilter === 'all' ? undefined : statusFilter,
+                    classification: classificationFilter === 'all' ? undefined : classificationFilter
+                }),
+                getLeadStats()
+            ]);
+            setLeads(leadsData);
+            setStats(statsData);
+        } catch (error) {
+            console.error('Error loading leads:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [statusFilter, classificationFilter]);
 
     useEffect(() => {
         loadData();
     }, [loadData]);
 
-    const handleStatusChange = async (lead: Lead, newStatus: Lead['status']) => {
-        const updatedLead = await updateLead(lead.id, {
-            status: newStatus,
-            contacted_at: newStatus === 'contacted' ? new Date().toISOString() : lead.contacted_at,
-            converted_at: newStatus === 'converted' ? new Date().toISOString() : lead.converted_at
-        });
-
-        if (updatedLead) {
-            setLeads(prev => prev.map(l => l.id === lead.id ? updatedLead : l));
+    const handleStatusChange = async (lead: Lead, newStatus: string) => {
+        try {
+            await updateLead(lead.id, {
+                status: newStatus as Lead['status'],
+                contacted_at: newStatus === 'contacted' ? new Date().toISOString() : lead.contacted_at,
+                converted_at: newStatus === 'converted' ? new Date().toISOString() : lead.converted_at
+            });
+            await loadData();
             if (selectedLead?.id === lead.id) {
-                setSelectedLead(updatedLead);
+                setSelectedLead({ ...lead, status: newStatus as Lead['status'] });
             }
+        } catch (error) {
+            console.error('Error updating lead:', error);
         }
     };
 
-    const getClassificationColor = (classification: string | null) => {
-        switch (classification) {
-            case 'hot': return '#ef4444';
-            case 'warm': return '#f59e0b';
-            case 'cold': return '#3b82f6';
-            default: return '#6b7280';
-        }
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'new': return '#8b5cf6';
-            case 'contacted': return '#3b82f6';
-            case 'qualified': return '#f59e0b';
-            case 'converted': return '#10b981';
-            case 'lost': return '#ef4444';
-            default: return '#6b7280';
-        }
+    const formatDuration = (seconds: number) => {
+        if (seconds < 60) return `${seconds}s`;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}m ${secs}s`;
     };
 
-    const getScoreGradient = (score: number) => {
-        if (score >= 80) return 'linear-gradient(90deg, #ef4444, #f97316)';
-        if (score >= 60) return 'linear-gradient(90deg, #f59e0b, #eab308)';
-        if (score >= 40) return 'linear-gradient(90deg, #3b82f6, #6366f1)';
-        return 'linear-gradient(90deg, #6b7280, #9ca3af)';
-    };
+    const hasData = stats.total > 0;
 
     return (
         <div className="admin-page">
             <AdminHeader
                 title="Leads"
-                subtitle="View and manage captured leads with AI scoring"
+                subtitle="Manage and track leads captured from your site"
             />
 
             {/* Stats Cards */}
-            <div className="admin-panel-stats" style={{ marginBottom: '2rem' }}>
-                <div className="stat-card clickable" onClick={() => setClassificationFilter('all')}>
-                    <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+            <div className="stats-grid">
+                <div className="stat-card primary">
+                    <div className="stat-main">
+                        <span className="stat-value">{stats.total}</span>
+                        <span className="stat-label">Total Leads</span>
+                    </div>
+                    <div className="stat-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                             <circle cx="9" cy="7" r="4" />
@@ -110,325 +125,495 @@ export default function LeadsPage() {
                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                     </div>
-                    <div className="stat-content">
-                        <span className="stat-value">{stats.total}</span>
-                        <span className="stat-label">Total Leads</span>
-                    </div>
                 </div>
 
-                <div className="stat-card clickable" onClick={() => setClassificationFilter('hot')}>
-                    <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 2v20M2 12h20" />
-                        </svg>
+                <div className="stat-card new">
+                    <div className="stat-main">
+                        <span className="stat-value">{stats.new}</span>
+                        <span className="stat-label">New Leads</span>
                     </div>
-                    <div className="stat-content">
+                    <div className="stat-icon">🆕</div>
+                </div>
+
+                <div className="stat-card hot">
+                    <div className="stat-main">
                         <span className="stat-value">{stats.hot}</span>
                         <span className="stat-label">Hot Leads</span>
                     </div>
+                    <div className="stat-icon">🔥</div>
                 </div>
 
-                <div className="stat-card clickable" onClick={() => setClassificationFilter('warm')}>
-                    <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 2v20M2 12h20" />
-                        </svg>
-                    </div>
-                    <div className="stat-content">
-                        <span className="stat-value">{stats.warm}</span>
-                        <span className="stat-label">Warm Leads</span>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </div>
-                    <div className="stat-content">
+                <div className="stat-card converted">
+                    <div className="stat-main">
                         <span className="stat-value">{stats.converted}</span>
                         <span className="stat-label">Converted</span>
                     </div>
+                    <div className="stat-icon">✅</div>
+                </div>
+
+                <div className="stat-card score">
+                    <div className="stat-main">
+                        <span className="stat-value">{stats.avgScore.toFixed(0)}</span>
+                        <span className="stat-label">Avg AI Score</span>
+                    </div>
+                    <div className="stat-icon">🧠</div>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="leads-filters">
-                <div className="filter-group">
-                    <label>Classification</label>
-                    <select
-                        value={classificationFilter}
-                        onChange={(e) => setClassificationFilter(e.target.value as LeadFilter)}
-                    >
-                        <option value="all">All Classifications</option>
-                        <option value="hot">🔥 Hot</option>
-                        <option value="warm">🌡️ Warm</option>
-                        <option value="cold">❄️ Cold</option>
-                    </select>
-                </div>
-
-                <div className="filter-group">
-                    <label>Status</label>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="qualified">Qualified</option>
-                        <option value="converted">Converted</option>
-                        <option value="lost">Lost</option>
-                    </select>
-                </div>
-
-                <div className="filter-stats">
-                    <span>Avg Score: <strong>{stats.avgScore.toFixed(0)}</strong></span>
-                </div>
-            </div>
-
-            {/* Leads Table */}
-            <div className="leads-container">
-                <div className="leads-list">
-                    {loading ? (
-                        <div className="leads-loading">Loading leads...</div>
-                    ) : leads.length === 0 ? (
-                        <div className="leads-empty">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            {!hasData ? (
+                /* Empty State */
+                <div className="empty-state-container">
+                    <div className="empty-state">
+                        <div className="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                 <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
-                            <p>No leads yet</p>
-                            <span>Leads captured from your site will appear here</span>
                         </div>
-                    ) : (
-                        <table className="leads-table">
-                            <thead>
-                                <tr>
-                                    <th>Score</th>
-                                    <th>Contact</th>
-                                    <th>Source</th>
-                                    <th>Behavior</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {leads.map(lead => (
-                                    <tr
-                                        key={lead.id}
-                                        className={selectedLead?.id === lead.id ? 'selected' : ''}
-                                        onClick={() => setSelectedLead(lead)}
-                                    >
-                                        <td>
-                                            <div className="score-cell">
-                                                <div
-                                                    className="score-badge"
-                                                    style={{ background: getScoreGradient(lead.ai_score || 0) }}
-                                                >
-                                                    {lead.ai_score || 0}
-                                                </div>
-                                                <span
-                                                    className="classification"
-                                                    style={{ color: getClassificationColor(lead.ai_classification) }}
-                                                >
-                                                    {lead.ai_classification || 'unscored'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="contact-cell">
-                                                <strong>{lead.email}</strong>
-                                                {lead.name && <span>{lead.name}</span>}
-                                                {lead.company && <span className="company">{lead.company}</span>}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="source-cell">
-                                                <span className="source-badge">{lead.source}</span>
-                                                {lead.source_page && (
-                                                    <span className="source-page">{lead.source_page}</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="behavior-cell">
-                                                <span title="Pages viewed">📄 {lead.pages_viewed}</span>
-                                                <span title="Time on site">{Math.floor(lead.time_on_site_seconds / 60)}m</span>
-                                                <span title="Scroll depth">⬇️ {lead.scroll_depth_avg}%</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span
-                                                className="status-badge"
-                                                style={{
-                                                    background: `${getStatusColor(lead.status)}20`,
-                                                    color: getStatusColor(lead.status)
-                                                }}
-                                            >
-                                                {lead.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className="date-cell">
-                                                {format(new Date(lead.created_at), 'MMM d, yyyy')}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
+                        <h3>No Leads Yet</h3>
+                        <p>
+                            Leads will appear here when visitors submit contact forms,
+                            sign up for newsletters, or take other conversion actions.
+                        </p>
+                        <div className="empty-tips">
+                            <div className="tip">
+                                <span className="tip-icon">📝</span>
+                                <span>Add a contact form to your site</span>
+                            </div>
+                            <div className="tip">
+                                <span className="tip-icon">📧</span>
+                                <span>Set up newsletter signup</span>
+                            </div>
+                            <div className="tip">
+                                <span className="tip-icon">🤖</span>
+                                <span>AI will automatically score and classify leads</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                {/* Lead Detail Panel */}
-                {selectedLead && (
-                    <div className="lead-detail">
-                        <div className="detail-header">
-                            <div className="detail-score">
-                                <div
-                                    className="score-circle"
-                                    style={{
-                                        background: getScoreGradient(selectedLead.ai_score || 0),
-                                        boxShadow: `0 0 30px ${getClassificationColor(selectedLead.ai_classification)}40`
-                                    }}
-                                >
-                                    {selectedLead.ai_score || 0}
-                                </div>
-                                <span
-                                    className="classification-label"
-                                    style={{ color: getClassificationColor(selectedLead.ai_classification) }}
-                                >
-                                    {selectedLead.ai_classification?.toUpperCase() || 'UNSCORED'}
-                                </span>
-                            </div>
-                            <button
-                                className="close-btn"
-                                onClick={() => setSelectedLead(null)}
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="detail-info">
-                            <h3>{selectedLead.email}</h3>
-                            {selectedLead.name && <p className="name">{selectedLead.name}</p>}
-                            {selectedLead.company && <p className="company">{selectedLead.company}</p>}
-                            {selectedLead.phone && <p className="phone">{selectedLead.phone}</p>}
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>AI Scoring Reasons</h4>
-                            <ul className="scoring-reasons">
-                                {(selectedLead.ai_score_reasons || []).map((reason, idx) => (
-                                    <li key={idx}>{reason}</li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>Behavior Signals</h4>
-                            <div className="behavior-grid">
-                                <div className="behavior-item">
-                                    <span className="behavior-value">{selectedLead.pages_viewed}</span>
-                                    <span className="behavior-label">Pages Viewed</span>
-                                </div>
-                                <div className="behavior-item">
-                                    <span className="behavior-value">{Math.floor(selectedLead.time_on_site_seconds / 60)}m</span>
-                                    <span className="behavior-label">Time on Site</span>
-                                </div>
-                                <div className="behavior-item">
-                                    <span className="behavior-value">{selectedLead.scroll_depth_avg}%</span>
-                                    <span className="behavior-label">Scroll Depth</span>
-                                </div>
-                                <div className="behavior-item">
-                                    <span className="behavior-value">{selectedLead.blog_posts_read}</span>
-                                    <span className="behavior-label">Posts Read</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="detail-section">
-                            <h4>Update Status</h4>
-                            <div className="status-buttons">
-                                {(['new', 'contacted', 'qualified', 'converted', 'lost'] as const).map(status => (
+            ) : (
+                <>
+                    {/* Filters */}
+                    <div className="filters-bar">
+                        <div className="filter-group">
+                            <label>Status</label>
+                            <div className="filter-pills">
+                                {(['all', 'new', 'contacted', 'qualified', 'converted', 'lost'] as StatusFilter[]).map(status => (
                                     <button
                                         key={status}
-                                        className={selectedLead.status === status ? 'active' : ''}
-                                        style={{
-                                            borderColor: selectedLead.status === status ? getStatusColor(status) : undefined,
-                                            background: selectedLead.status === status ? `${getStatusColor(status)}20` : undefined
-                                        }}
-                                        onClick={() => handleStatusChange(selectedLead, status)}
+                                        className={statusFilter === status ? 'active' : ''}
+                                        onClick={() => setStatusFilter(status)}
                                     >
-                                        {status}
+                                        {status === 'all' ? 'All' : STATUS_CONFIG[status]?.label || status}
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="detail-section">
-                            <h4>Source</h4>
-                            <p className="source-info">
-                                <span>Source: {selectedLead.source}</span>
-                                {selectedLead.source_page && <span>Page: {selectedLead.source_page}</span>}
-                                {selectedLead.referrer && <span>Referrer: {selectedLead.referrer}</span>}
-                                {selectedLead.utm_source && <span>UTM: {selectedLead.utm_source}</span>}
-                            </p>
+                        <div className="filter-group">
+                            <label>Classification</label>
+                            <div className="filter-pills">
+                                {(['all', 'hot', 'warm', 'cold'] as ClassificationFilter[]).map(classification => (
+                                    <button
+                                        key={classification}
+                                        className={classificationFilter === classification ? 'active' : ''}
+                                        onClick={() => setClassificationFilter(classification)}
+                                    >
+                                        {classification === 'all' ? 'All' : (
+                                            <>
+                                                {CLASSIFICATION_CONFIG[classification]?.icon} {CLASSIFICATION_CONFIG[classification]?.label}
+                                            </>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Leads Layout */}
+                    <div className="leads-layout">
+                        {/* Leads List */}
+                        <div className="leads-list">
+                            {loading ? (
+                                <div className="loading-state">
+                                    <div className="spinner" />
+                                    <span>Loading leads...</span>
+                                </div>
+                            ) : leads.length === 0 ? (
+                                <div className="no-results">
+                                    <p>No leads match your filters</p>
+                                    <button onClick={() => {
+                                        setStatusFilter('all');
+                                        setClassificationFilter('all');
+                                    }}>
+                                        Clear filters
+                                    </button>
+                                </div>
+                            ) : (
+                                leads.map(lead => {
+                                    const classification = lead.ai_classification;
+                                    const classConfig = classification ? CLASSIFICATION_CONFIG[classification] : null;
+                                    const statusConfig = STATUS_CONFIG[lead.status];
+
+                                    return (
+                                        <div
+                                            key={lead.id}
+                                            className={`lead-card ${selectedLead?.id === lead.id ? 'selected' : ''}`}
+                                            onClick={() => setSelectedLead(lead)}
+                                        >
+                                            <div className="lead-header">
+                                                <div className="lead-identity">
+                                                    <div className="lead-avatar">
+                                                        {(lead.name || lead.email || '?')[0].toUpperCase()}
+                                                    </div>
+                                                    <div className="lead-info">
+                                                        <span className="lead-name">
+                                                            {lead.name || lead.email || 'Anonymous'}
+                                                        </span>
+                                                        {lead.company && (
+                                                            <span className="lead-company">{lead.company}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="lead-badges">
+                                                    {classConfig && (
+                                                        <span
+                                                            className="badge classification"
+                                                            style={{ color: classConfig.color }}
+                                                        >
+                                                            {classConfig.icon}
+                                                        </span>
+                                                    )}
+                                                    <span
+                                                        className="badge status"
+                                                        style={{
+                                                            color: statusConfig?.color,
+                                                            background: statusConfig?.bg
+                                                        }}
+                                                    >
+                                                        {statusConfig?.label}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="lead-meta">
+                                                {lead.ai_score !== null && (
+                                                    <span className="score">
+                                                        Score: {lead.ai_score}
+                                                    </span>
+                                                )}
+                                                <span className="source">{lead.source}</span>
+                                                <span className="date">{formatDate(lead.created_at)}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
 
-                        <div className="detail-footer">
-                            <span>Created: {format(new Date(selectedLead.created_at), 'PPpp')}</span>
-                            {selectedLead.contacted_at && (
-                                <span>Contacted: {format(new Date(selectedLead.contacted_at), 'PPpp')}</span>
+                        {/* Lead Detail Panel */}
+                        <div className={`lead-detail ${selectedLead ? 'open' : ''}`}>
+                            {selectedLead ? (
+                                <>
+                                    <div className="detail-header">
+                                        <button
+                                            className="close-detail"
+                                            onClick={() => setSelectedLead(null)}
+                                        >
+                                            ✕
+                                        </button>
+                                        <div className="detail-avatar">
+                                            {(selectedLead.name || selectedLead.email || '?')[0].toUpperCase()}
+                                        </div>
+                                        <h2>{selectedLead.name || 'Anonymous Lead'}</h2>
+                                        {selectedLead.company && (
+                                            <span className="company">{selectedLead.company}</span>
+                                        )}
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <h3>Contact Info</h3>
+                                        <div className="info-grid">
+                                            {selectedLead.email && (
+                                                <div className="info-item">
+                                                    <span className="info-label">Email</span>
+                                                    <a href={`mailto:${selectedLead.email}`} className="info-value link">
+                                                        {selectedLead.email}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {selectedLead.phone && (
+                                                <div className="info-item">
+                                                    <span className="info-label">Phone</span>
+                                                    <a href={`tel:${selectedLead.phone}`} className="info-value link">
+                                                        {selectedLead.phone}
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <h3>AI Analysis</h3>
+                                        <div className="ai-analysis">
+                                            {selectedLead.ai_score !== null && (
+                                                <div className="score-display">
+                                                    <div className="score-circle">
+                                                        <span className="score-value">{selectedLead.ai_score}</span>
+                                                        <span className="score-label">Score</span>
+                                                    </div>
+                                                    {selectedLead.ai_classification && (
+                                                        <div
+                                                            className="classification-display"
+                                                            style={{
+                                                                color: CLASSIFICATION_CONFIG[selectedLead.ai_classification]?.color
+                                                            }}
+                                                        >
+                                                            {CLASSIFICATION_CONFIG[selectedLead.ai_classification]?.icon}
+                                                            <span>{CLASSIFICATION_CONFIG[selectedLead.ai_classification]?.label}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {selectedLead.ai_summary && (
+                                                <p className="ai-summary">{selectedLead.ai_summary}</p>
+                                            )}
+                                            {selectedLead.ai_score_reasons && selectedLead.ai_score_reasons.length > 0 && (
+                                                <ul className="score-reasons">
+                                                    {selectedLead.ai_score_reasons.map((reason, idx) => (
+                                                        <li key={idx}>{reason}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <h3>Behavior</h3>
+                                        <div className="behavior-stats">
+                                            <div className="behavior-item">
+                                                <span className="behavior-value">{selectedLead.pages_viewed}</span>
+                                                <span className="behavior-label">Pages Viewed</span>
+                                            </div>
+                                            <div className="behavior-item">
+                                                <span className="behavior-value">{formatDuration(selectedLead.time_on_site_seconds)}</span>
+                                                <span className="behavior-label">Time on Site</span>
+                                            </div>
+                                            <div className="behavior-item">
+                                                <span className="behavior-value">{selectedLead.blog_posts_read}</span>
+                                                <span className="behavior-label">Posts Read</span>
+                                            </div>
+                                            <div className="behavior-item">
+                                                <span className="behavior-value">{selectedLead.scroll_depth_avg}%</span>
+                                                <span className="behavior-label">Avg Scroll</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <h3>Status</h3>
+                                        <div className="status-selector">
+                                            {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                                                <button
+                                                    key={status}
+                                                    className={selectedLead.status === status ? 'active' : ''}
+                                                    style={{
+                                                        '--status-color': config.color,
+                                                        '--status-bg': config.bg
+                                                    } as React.CSSProperties}
+                                                    onClick={() => handleStatusChange(selectedLead, status)}
+                                                >
+                                                    {config.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-section">
+                                        <h3>Source</h3>
+                                        <div className="source-info">
+                                            <div className="source-item">
+                                                <span className="source-label">Source</span>
+                                                <span className="source-value">{selectedLead.source}</span>
+                                            </div>
+                                            {selectedLead.source_page && (
+                                                <div className="source-item">
+                                                    <span className="source-label">Page</span>
+                                                    <span className="source-value">{selectedLead.source_page}</span>
+                                                </div>
+                                            )}
+                                            {selectedLead.utm_source && (
+                                                <div className="source-item">
+                                                    <span className="source-label">Campaign</span>
+                                                    <span className="source-value">
+                                                        {selectedLead.utm_source}
+                                                        {selectedLead.utm_medium && ` / ${selectedLead.utm_medium}`}
+                                                        {selectedLead.utm_campaign && ` / ${selectedLead.utm_campaign}`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="no-selection">
+                                    <p>Select a lead to view details</p>
+                                </div>
                             )}
                         </div>
                     </div>
-                )}
-            </div>
+                </>
+            )}
 
             <style jsx>{`
-                .leads-filters {
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(5, 1fr);
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .stat-card {
                     display: flex;
-                    gap: 1.5rem;
-                    align-items: flex-end;
-                    padding: 1rem 1.5rem;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 1.25rem;
+                    background: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-lg);
+                }
+
+                .stat-main {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .stat-value {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    line-height: 1.2;
+                }
+
+                .stat-label {
+                    font-size: 0.8rem;
+                    color: var(--color-foreground-muted);
+                }
+
+                .stat-icon {
+                    font-size: 1.5rem;
+                    opacity: 0.5;
+                }
+
+                .stat-card.primary .stat-value { color: var(--color-accent-solid); }
+                .stat-card.new .stat-value { color: #3b82f6; }
+                .stat-card.hot .stat-value { color: #ef4444; }
+                .stat-card.converted .stat-value { color: #10b981; }
+                .stat-card.score .stat-value { color: #8b5cf6; }
+
+                .empty-state-container {
+                    background: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-lg);
+                    padding: 4rem 2rem;
+                }
+
+                .empty-state {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    text-align: center;
+                }
+
+                .empty-icon {
+                    width: 100px;
+                    height: 100px;
+                    margin: 0 auto 1.5rem;
+                    border-radius: var(--radius-lg);
+                    background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                }
+
+                .empty-state h3 {
+                    font-size: 1.5rem;
+                    margin: 0 0 0.5rem;
+                }
+
+                .empty-state > p {
+                    color: var(--color-foreground-muted);
+                    margin: 0 0 2rem;
+                    line-height: 1.6;
+                }
+
+                .empty-tips {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    text-align: left;
+                }
+
+                .tip {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.75rem 1rem;
+                    background: var(--color-background);
+                    border-radius: var(--radius-md);
+                }
+
+                .tip-icon {
+                    font-size: 1.25rem;
+                }
+
+                .filters-bar {
+                    display: flex;
+                    gap: 2rem;
+                    padding: 1rem 1.25rem;
                     background: var(--color-surface);
                     border: 1px solid var(--color-border);
                     border-radius: var(--radius-lg);
                     margin-bottom: 1.5rem;
-                }
-
-                .filter-group {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
+                    flex-wrap: wrap;
                 }
 
                 .filter-group label {
-                    font-size: 0.8rem;
-                    font-weight: 500;
+                    display: block;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
                     color: var(--color-foreground-muted);
+                    margin-bottom: 0.5rem;
                 }
 
-                .filter-group select {
-                    padding: 0.5rem 1rem;
+                .filter-pills {
+                    display: flex;
+                    gap: 0.375rem;
+                    flex-wrap: wrap;
+                }
+
+                .filter-pills button {
+                    padding: 0.375rem 0.75rem;
                     background: var(--color-background);
                     border: 1px solid var(--color-border);
                     border-radius: var(--radius-md);
-                    color: var(--color-foreground);
-                    min-width: 180px;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                    transition: all 0.15s;
                 }
 
-                .filter-stats {
-                    margin-left: auto;
-                    color: var(--color-foreground-muted);
+                .filter-pills button.active {
+                    background: var(--color-accent-gradient);
+                    border-color: transparent;
+                    color: white;
                 }
 
-                .leads-container {
+                .leads-layout {
                     display: grid;
-                    grid-template-columns: 1fr 380px;
+                    grid-template-columns: 1fr 400px;
                     gap: 1.5rem;
                 }
 
@@ -436,141 +621,134 @@ export default function LeadsPage() {
                     background: var(--color-surface);
                     border: 1px solid var(--color-border);
                     border-radius: var(--radius-lg);
-                    overflow: hidden;
-                }
-
-                .leads-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-
-                .leads-table th {
-                    text-align: left;
                     padding: 1rem;
-                    font-size: 0.75rem;
-                    text-transform: uppercase;
+                    max-height: 70vh;
+                    overflow-y: auto;
+                }
+
+                .loading-state, .no-results {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 1rem;
+                    padding: 3rem;
                     color: var(--color-foreground-muted);
-                    border-bottom: 1px solid var(--color-border);
+                }
+
+                .spinner {
+                    width: 24px;
+                    height: 24px;
+                    border: 3px solid var(--color-border);
+                    border-top-color: var(--color-accent-solid);
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .no-results button {
+                    padding: 0.5rem 1rem;
                     background: var(--color-background);
-                }
-
-                .leads-table td {
-                    padding: 1rem;
-                    border-bottom: 1px solid var(--color-border);
-                    vertical-align: middle;
-                }
-
-                .leads-table tr {
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-md);
                     cursor: pointer;
-                    transition: background 0.15s ease;
                 }
 
-                .leads-table tr:hover {
+                .lead-card {
+                    padding: 1rem;
                     background: var(--color-background);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-md);
+                    margin-bottom: 0.5rem;
+                    cursor: pointer;
+                    transition: all 0.15s;
                 }
 
-                .leads-table tr.selected {
-                    background: rgba(139, 92, 246, 0.1);
+                .lead-card:hover {
+                    border-color: var(--color-border-hover);
                 }
 
-                .score-cell {
+                .lead-card.selected {
+                    border-color: var(--color-accent-solid);
+                    box-shadow: 0 0 0 1px var(--color-accent-solid);
+                }
+
+                .lead-header {
                     display: flex;
                     align-items: center;
-                    gap: 0.5rem;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
                 }
 
-                .score-badge {
+                .lead-identity {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+
+                .lead-avatar {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: var(--color-accent-gradient);
+                    color: white;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 36px;
-                    height: 36px;
-                    border-radius: var(--radius-md);
-                    color: white;
-                    font-weight: 700;
-                    font-size: 0.85rem;
-                }
-
-                .classification {
-                    font-size: 0.75rem;
                     font-weight: 600;
-                    text-transform: uppercase;
-                }
-
-                .contact-cell {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.125rem;
-                }
-
-                .contact-cell strong {
                     font-size: 0.9rem;
                 }
 
-                .contact-cell span {
+                .lead-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .lead-name {
+                    font-weight: 500;
+                }
+
+                .lead-company {
                     font-size: 0.8rem;
                     color: var(--color-foreground-muted);
                 }
 
-                .contact-cell .company {
-                    color: var(--color-accent-solid);
-                }
-
-                .source-cell {
+                .lead-badges {
                     display: flex;
-                    flex-direction: column;
-                    gap: 0.25rem;
+                    gap: 0.5rem;
                 }
 
-                .source-badge {
-                    display: inline-block;
-                    padding: 0.125rem 0.5rem;
-                    background: var(--color-background);
+                .badge {
+                    padding: 0.25rem 0.5rem;
                     border-radius: var(--radius-sm);
                     font-size: 0.75rem;
-                    width: fit-content;
-                }
-
-                .source-page {
-                    font-size: 0.75rem;
-                    color: var(--color-foreground-muted);
-                }
-
-                .behavior-cell {
-                    display: flex;
-                    gap: 0.75rem;
-                    font-size: 0.8rem;
-                    color: var(--color-foreground-muted);
-                }
-
-                .status-badge {
-                    padding: 0.25rem 0.75rem;
-                    border-radius: var(--radius-full);
-                    font-size: 0.75rem;
                     font-weight: 500;
-                    text-transform: capitalize;
                 }
 
-                .date-cell {
+                .badge.status {
+                    background: var(--color-surface);
+                }
+
+                .badge.classification {
+                    font-size: 1rem;
+                }
+
+                .lead-meta {
+                    display: flex;
+                    gap: 1rem;
                     font-size: 0.8rem;
                     color: var(--color-foreground-muted);
                 }
 
-                .leads-loading,
-                .leads-empty {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 4rem;
-                    color: var(--color-foreground-muted);
+                .lead-meta .score {
+                    color: #8b5cf6;
+                    font-weight: 500;
                 }
 
-                .leads-empty svg {
-                    opacity: 0.3;
-                    margin-bottom: 1rem;
-                }
-
+                /* Lead Detail Panel */
                 .lead-detail {
                     background: var(--color-surface);
                     border: 1px solid var(--color-border);
@@ -581,177 +759,260 @@ export default function LeadsPage() {
                     top: 1rem;
                 }
 
-                .detail-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-bottom: 1.5rem;
-                }
-
-                .detail-score {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
-
-                .score-circle {
-                    width: 80px;
-                    height: 80px;
-                    border-radius: 50%;
+                .no-selection {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.75rem;
-                    font-weight: 700;
-                    color: white;
-                }
-
-                .classification-label {
-                    font-size: 0.75rem;
-                    font-weight: 700;
-                    letter-spacing: 0.05em;
-                }
-
-                .close-btn {
-                    background: transparent;
-                    border: none;
+                    min-height: 300px;
                     color: var(--color-foreground-muted);
-                    font-size: 1.25rem;
-                    cursor: pointer;
-                    padding: 0.25rem;
                 }
 
-                .detail-info {
+                .detail-header {
                     text-align: center;
+                    margin-bottom: 1.5rem;
+                    position: relative;
+                }
+
+                .close-detail {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: none;
+                    border: none;
+                    font-size: 1.25rem;
+                    color: var(--color-foreground-muted);
+                    cursor: pointer;
+                }
+
+                .detail-avatar {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    background: var(--color-accent-gradient);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 1.5rem;
+                    margin: 0 auto 0.75rem;
+                }
+
+                .detail-header h2 {
+                    margin: 0 0 0.25rem;
+                    font-size: 1.25rem;
+                }
+
+                .detail-header .company {
+                    color: var(--color-foreground-muted);
+                    font-size: 0.9rem;
+                }
+
+                .detail-section {
                     margin-bottom: 1.5rem;
                     padding-bottom: 1.5rem;
                     border-bottom: 1px solid var(--color-border);
                 }
 
-                .detail-info h3 {
-                    margin: 0 0 0.25rem;
-                    font-size: 1.1rem;
-                }
-
-                .detail-info p {
-                    margin: 0;
-                    font-size: 0.9rem;
-                    color: var(--color-foreground-muted);
-                }
-
-                .detail-section {
-                    margin-bottom: 1.5rem;
-                }
-
-                .detail-section h4 {
-                    margin: 0 0 0.75rem;
-                    font-size: 0.8rem;
-                    text-transform: uppercase;
-                    color: var(--color-foreground-muted);
-                }
-
-                .scoring-reasons {
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                }
-
-                .scoring-reasons li {
-                    padding: 0.5rem 0;
-                    font-size: 0.85rem;
-                    border-bottom: 1px solid var(--color-border);
-                }
-
-                .scoring-reasons li:last-child {
+                .detail-section:last-child {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
                     border-bottom: none;
                 }
 
-                .behavior-grid {
+                .detail-section h3 {
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    color: var(--color-foreground-muted);
+                    margin: 0 0 0.75rem;
+                }
+
+                .info-grid {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .info-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.125rem;
+                }
+
+                .info-label {
+                    font-size: 0.75rem;
+                    color: var(--color-foreground-muted);
+                }
+
+                .info-value {
+                    font-size: 0.9rem;
+                }
+
+                .info-value.link {
+                    color: var(--color-accent-solid);
+                    text-decoration: none;
+                }
+
+                .ai-analysis {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+
+                .score-display {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+
+                .score-circle {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+                    color: white;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .score-value {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    line-height: 1.2;
+                }
+
+                .score-label {
+                    font-size: 0.6rem;
+                    text-transform: uppercase;
+                    opacity: 0.8;
+                }
+
+                .classification-display {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.375rem;
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                }
+
+                .ai-summary {
+                    font-size: 0.9rem;
+                    color: var(--color-foreground-muted);
+                    line-height: 1.5;
+                    margin: 0;
+                }
+
+                .score-reasons {
+                    margin: 0;
+                    padding-left: 1.25rem;
+                    font-size: 0.85rem;
+                    color: var(--color-foreground-muted);
+                }
+
+                .score-reasons li {
+                    margin-bottom: 0.25rem;
+                }
+
+                .behavior-stats {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 1rem;
+                    gap: 0.75rem;
                 }
 
                 .behavior-item {
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
-                    padding: 1rem;
+                    padding: 0.75rem;
                     background: var(--color-background);
                     border-radius: var(--radius-md);
+                    text-align: center;
                 }
 
                 .behavior-value {
-                    font-size: 1.5rem;
+                    font-size: 1.25rem;
                     font-weight: 700;
                 }
 
                 .behavior-label {
-                    font-size: 0.75rem;
+                    font-size: 0.7rem;
                     color: var(--color-foreground-muted);
                 }
 
-                .status-buttons {
+                .status-selector {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 0.5rem;
+                    gap: 0.375rem;
                 }
 
-                .status-buttons button {
-                    padding: 0.5rem 1rem;
-                    background: var(--color-background);
+                .status-selector button {
+                    padding: 0.375rem 0.75rem;
                     border: 1px solid var(--color-border);
                     border-radius: var(--radius-md);
-                    color: var(--color-foreground);
+                    background: var(--color-background);
                     font-size: 0.8rem;
-                    text-transform: capitalize;
                     cursor: pointer;
-                    transition: all 0.15s ease;
+                    transition: all 0.15s;
+                }
+
+                .status-selector button.active {
+                    background: var(--status-bg);
+                    border-color: var(--status-color);
+                    color: var(--status-color);
                 }
 
                 .source-info {
                     display: flex;
                     flex-direction: column;
-                    gap: 0.25rem;
-                    font-size: 0.85rem;
-                    color: var(--color-foreground-muted);
+                    gap: 0.5rem;
                 }
 
-                .detail-footer {
+                .source-item {
                     display: flex;
                     flex-direction: column;
-                    gap: 0.25rem;
-                    font-size: 0.75rem;
+                    gap: 0.125rem;
+                }
+
+                .source-label {
+                    font-size: 0.7rem;
                     color: var(--color-foreground-muted);
-                    padding-top: 1rem;
-                    border-top: 1px solid var(--color-border);
                 }
 
-                .stat-card.clickable {
-                    cursor: pointer;
-                    transition: transform 0.15s ease;
+                .source-value {
+                    font-size: 0.85rem;
                 }
 
-                .stat-card.clickable:hover {
-                    transform: translateY(-2px);
-                }
+                @media (max-width: 1024px) {
+                    .stats-grid {
+                        grid-template-columns: repeat(3, 1fr);
+                    }
 
-                @media (max-width: 1200px) {
-                    .leads-container {
+                    .leads-layout {
                         grid-template-columns: 1fr;
                     }
 
                     .lead-detail {
                         position: fixed;
-                        right: 0;
-                        top: 0;
                         bottom: 0;
-                        width: 400px;
-                        border-radius: 0;
+                        left: 0;
+                        right: 0;
+                        max-height: 60vh;
+                        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                        transform: translateY(100%);
+                        transition: transform 0.3s ease;
                         overflow-y: auto;
-                        z-index: 100;
-                        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .lead-detail.open {
+                        transform: translateY(0);
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .stats-grid {
+                        grid-template-columns: repeat(2, 1fr);
                     }
                 }
             `}</style>
