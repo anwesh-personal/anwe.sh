@@ -6,13 +6,20 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Service role client for full access
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-initialized Supabase client
+let _supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+    if (!_supabase) {
+        _supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+    }
+    return _supabase;
+}
 
 // Validate ORA's authentication
 function validateOraAuth(request: NextRequest): boolean {
@@ -125,7 +132,7 @@ export async function POST(request: NextRequest) {
 // ============================================
 
 async function listPosts(data: { status?: string; limit?: number; offset?: number }) {
-    let query = supabase.from('blog_posts').select('*');
+    let query = getSupabase().from('blog_posts').select('*');
 
     if (data?.status) query = query.eq('status', data.status);
     query = query.order('created_at', { ascending: false });
@@ -143,8 +150,8 @@ async function getPost(data: { id?: string; slug?: string }) {
     }
 
     const query = data.id
-        ? supabase.from('blog_posts').select('*').eq('id', data.id)
-        : supabase.from('blog_posts').select('*').eq('slug', data.slug);
+        ? getSupabase().from('blog_posts').select('*').eq('id', data.id)
+        : getSupabase().from('blog_posts').select('*').eq('slug', data.slug);
 
     const { data: post, error } = await query.single();
     if (error) return NextResponse.json({ error: error.message }, { status: 404 });
@@ -164,7 +171,7 @@ async function createPost(data: {
 }) {
     const slug = data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-    const { data: post, error } = await supabase
+    const { data: post, error } = await getSupabase()
         .from('blog_posts')
         .insert({
             title: data.title,
@@ -190,7 +197,7 @@ async function updatePost(data: { id: string;[key: string]: unknown }) {
 
     updates.updated_at = new Date().toISOString();
 
-    const { data: post, error } = await supabase
+    const { data: post, error } = await getSupabase()
         .from('blog_posts')
         .update(updates)
         .eq('id', id)
@@ -204,7 +211,7 @@ async function updatePost(data: { id: string;[key: string]: unknown }) {
 async function deletePost(data: { id: string }) {
     if (!data?.id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-    const { error } = await supabase.from('blog_posts').delete().eq('id', data.id);
+    const { error } = await getSupabase().from('blog_posts').delete().eq('id', data.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ deleted: true });
 }
@@ -212,7 +219,7 @@ async function deletePost(data: { id: string }) {
 async function publishPost(data: { id: string }) {
     if (!data?.id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-    const { data: post, error } = await supabase
+    const { data: post, error } = await getSupabase()
         .from('blog_posts')
         .update({
             status: 'published',
@@ -236,12 +243,12 @@ async function getAnalyticsSummary(data: { days?: number }) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const { data: pageViews } = await supabase
+    const { data: pageViews } = await getSupabase()
         .from('page_views')
         .select('*')
         .gte('created_at', startDate.toISOString());
 
-    const { data: leads } = await supabase
+    const { data: leads } = await getSupabase()
         .from('leads')
         .select('*')
         .gte('created_at', startDate.toISOString());
@@ -271,7 +278,7 @@ async function getPageViews(data: { days?: number; path?: string; limit?: number
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    let query = supabase
+    let query = getSupabase()
         .from('page_views')
         .select('*')
         .gte('created_at', startDate.toISOString())
@@ -290,7 +297,7 @@ async function getHeatmaps(data: { path?: string; days?: number }) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    let query = supabase
+    let query = getSupabase()
         .from('heatmap_events')
         .select('*')
         .gte('created_at', startDate.toISOString());
@@ -307,7 +314,7 @@ async function getHeatmaps(data: { path?: string; days?: number }) {
 // ============================================
 
 async function listLeads(data: { status?: string; classification?: string; limit?: number }) {
-    let query = supabase.from('leads').select('*');
+    let query = getSupabase().from('leads').select('*');
 
     if (data?.status) query = query.eq('status', data.status);
     if (data?.classification) query = query.eq('ai_classification', data.classification);
@@ -322,7 +329,7 @@ async function listLeads(data: { status?: string; classification?: string; limit
 async function getLead(data: { id: string }) {
     if (!data?.id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-    const { data: lead, error } = await supabase
+    const { data: lead, error } = await getSupabase()
         .from('leads')
         .select('*')
         .eq('id', data.id)
@@ -336,7 +343,7 @@ async function updateLead(data: { id: string;[key: string]: unknown }) {
     const { id, ...updates } = data;
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-    const { data: lead, error } = await supabase
+    const { data: lead, error } = await getSupabase()
         .from('leads')
         .update(updates)
         .eq('id', id)
@@ -349,7 +356,7 @@ async function updateLead(data: { id: string;[key: string]: unknown }) {
 
 async function analyzeLead(data: { id: string }) {
     // Get lead with behavior data
-    const { data: lead } = await supabase
+    const { data: lead } = await getSupabase()
         .from('leads')
         .select('*')
         .eq('id', data.id)
@@ -378,7 +385,7 @@ async function analyzeLead(data: { id: string }) {
 // ============================================
 
 async function getSettings() {
-    const { data, error } = await supabase.from('site_settings').select('key, value');
+    const { data, error } = await getSupabase().from('site_settings').select('key, value');
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const settings: Record<string, unknown> = {};
@@ -397,7 +404,7 @@ async function updateSettings(data: { settings: Record<string, unknown> }) {
     const updates = Object.entries(data?.settings || {});
 
     for (const [key, value] of updates) {
-        await supabase
+        await getSupabase()
             .from('site_settings')
             .upsert({
                 key,
@@ -421,7 +428,7 @@ async function storeMemory(data: {
     expires_at?: string;
 }) {
     // Use the agent_memory table for ORA's site-specific context
-    const { data: memory, error } = await supabase
+    const { data: memory, error } = await getSupabase()
         .from('agent_memory')
         .upsert({
             agent_id: null, // ORA's external memory (no specific agent)
@@ -442,7 +449,7 @@ async function storeMemory(data: {
 }
 
 async function recallMemory(data: { key?: string; type?: string; limit?: number }) {
-    let query = supabase
+    let query = getSupabase()
         .from('agent_memory')
         .select('*')
         .is('agent_id', null) // ORA's external memory
@@ -459,7 +466,7 @@ async function recallMemory(data: { key?: string; type?: string; limit?: number 
 }
 
 async function searchMemory(data: { query: string; type?: string; limit?: number }) {
-    let query = supabase
+    let query = getSupabase()
         .from('agent_memory')
         .select('*')
         .is('agent_id', null)
@@ -475,7 +482,7 @@ async function searchMemory(data: { query: string; type?: string; limit?: number
 }
 
 async function clearMemory(data: { key?: string; type?: string; all?: boolean }) {
-    let query = supabase
+    let query = getSupabase()
         .from('agent_memory')
         .delete()
         .is('agent_id', null)
@@ -500,18 +507,18 @@ async function uploadFile(data: { name: string; content: string; type: string; f
     const buffer = Buffer.from(data.content, 'base64');
     const path = `${data.folder || 'ora'}/${Date.now()}-${data.name}`;
 
-    const { error } = await supabase.storage
+    const { error } = await getSupabase().storage
         .from('uploads')
         .upload(path, buffer, { contentType: data.type });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(path);
+    const { data: urlData } = getSupabase().storage.from('uploads').getPublicUrl(path);
     return NextResponse.json({ path, url: urlData.publicUrl, uploaded: true });
 }
 
 async function listFiles(data: { folder?: string }) {
-    const { data: files, error } = await supabase.storage
+    const { data: files, error } = await getSupabase().storage
         .from('uploads')
         .list(data?.folder || 'ora');
 
@@ -525,9 +532,9 @@ async function listFiles(data: { folder?: string }) {
 
 async function getSystemStatus() {
     // Get counts
-    const { count: postsCount } = await supabase.from('blog_posts').select('*', { count: 'exact', head: true });
-    const { count: leadsCount } = await supabase.from('leads').select('*', { count: 'exact', head: true });
-    const { count: viewsCount } = await supabase.from('page_views').select('*', { count: 'exact', head: true });
+    const { count: postsCount } = await getSupabase().from('blog_posts').select('*', { count: 'exact', head: true });
+    const { count: leadsCount } = await getSupabase().from('leads').select('*', { count: 'exact', head: true });
+    const { count: viewsCount } = await getSupabase().from('page_views').select('*', { count: 'exact', head: true });
 
     return NextResponse.json({
         status: 'online',
@@ -543,7 +550,7 @@ async function getSystemStatus() {
 
 async function logAction(data: { action: string; details?: unknown }) {
     // Log ORA's action for audit
-    await supabase.from('agent_runs').insert({
+    await getSupabase().from('agent_runs').insert({
         agent_id: null,
         action: `ora:${data.action}`,
         input: data.details || {},
