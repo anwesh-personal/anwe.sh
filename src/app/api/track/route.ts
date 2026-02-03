@@ -4,13 +4,19 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Use service role for inserts (bypasses RLS)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Lazy initialization to avoid build-time errors
+function getSupabase(): SupabaseClient {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Missing Supabase environment variables');
+    }
+
+    return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 interface TrackingEvent {
     type: 'session' | 'pageview' | 'event';
@@ -85,7 +91,7 @@ export async function POST(request: NextRequest) {
 
         // Insert session events
         if (sessionEvents.length > 0) {
-            const { error } = await supabase
+            const { error } = await getSupabase()
                 .from('sessions')
                 .upsert(sessionEvents, {
                     onConflict: 'session_id',
@@ -99,7 +105,7 @@ export async function POST(request: NextRequest) {
 
         // Insert page views
         if (pageViewEvents.length > 0) {
-            const { error } = await supabase
+            const { error } = await getSupabase()
                 .from('page_views')
                 .insert(pageViewEvents);
 
@@ -109,7 +115,7 @@ export async function POST(request: NextRequest) {
 
             // Update session page count
             for (const pv of pageViewEvents) {
-                await supabase
+                await getSupabase()
                     .from('sessions')
                     .update({
                         exit_page: pv.page_path,
@@ -121,7 +127,7 @@ export async function POST(request: NextRequest) {
 
         // Insert heatmap events
         if (heatmapEvents.length > 0) {
-            const { error } = await supabase
+            const { error } = await getSupabase()
                 .from('heatmap_events')
                 .insert(heatmapEvents);
 

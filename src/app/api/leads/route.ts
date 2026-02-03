@@ -4,12 +4,19 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Lazy initialization to avoid build-time errors
+function getSupabase(): SupabaseClient {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Missing Supabase environment variables');
+    }
+
+    return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 // AI Lead Scoring based on behavior signals
 async function calculateLeadScore(data: {
@@ -56,7 +63,7 @@ async function calculateLeadScore(data: {
 
     // Session behavior analysis
     if (data.sessionId) {
-        const { data: session } = await supabase
+        const { data: session } = await getSupabase()
             .from('sessions')
             .select('*')
             .eq('session_id', data.sessionId)
@@ -135,7 +142,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check for existing lead
-        const { data: existingLead } = await supabase
+        const { data: existingLead } = await getSupabase()
             .from('leads')
             .select('id')
             .eq('email', email.toLowerCase())
@@ -143,7 +150,7 @@ export async function POST(request: NextRequest) {
 
         if (existingLead) {
             // Update existing lead with new session info
-            await supabase
+            await getSupabase()
                 .from('leads')
                 .update({
                     session_id: sessionId,
@@ -175,7 +182,7 @@ export async function POST(request: NextRequest) {
         };
 
         if (sessionId) {
-            const { data: session } = await supabase
+            const { data: session } = await getSupabase()
                 .from('sessions')
                 .select('page_count, duration_seconds, max_scroll_depth')
                 .eq('session_id', sessionId)
@@ -191,7 +198,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create lead
-        const { data: lead, error } = await supabase
+        const { data: lead, error } = await getSupabase()
             .from('leads')
             .insert([{
                 email: email.toLowerCase(),
@@ -223,7 +230,7 @@ export async function POST(request: NextRequest) {
 
         // Mark session as converted
         if (sessionId) {
-            await supabase
+            await getSupabase()
                 .from('sessions')
                 .update({
                     converted: true,
@@ -259,7 +266,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const classification = searchParams.get('classification');
 
-    let query = supabase
+    let query = getSupabase()
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })

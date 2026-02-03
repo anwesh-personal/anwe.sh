@@ -92,8 +92,9 @@ export async function middleware(request: NextRequest) {
     // MAIN DOMAIN ROUTING: anwe.sh
     // =========================================
 
-    // On main domain, redirect /admin to app subdomain
-    if (pathname.startsWith('/admin')) {
+    // On main domain, redirect /admin to app subdomain (but not on localhost)
+    const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+    if (pathname.startsWith('/admin') && !isLocalhost) {
         return NextResponse.redirect(new URL(pathname, 'https://app.anwe.sh'));
     }
 
