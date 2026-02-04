@@ -1,6 +1,7 @@
 /**
  * Heatmaps API Route
  * Server-side heatmap data retrieval using service role key to bypass RLS
+ * REQUIRES ADMIN AUTHENTICATION
  * 
  * GET /api/heatmaps
  *   Query params:
@@ -14,27 +15,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Lazy initialization
-let supabaseAdmin: ReturnType<typeof createClient> | null = null;
-
-function getSupabaseAdmin() {
-    if (!supabaseAdmin) {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-        if (!url || !serviceKey) {
-            throw new Error('Missing Supabase configuration');
-        }
-
-        supabaseAdmin = createClient(url, serviceKey);
-    }
-    return supabaseAdmin;
-}
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
     try {
+        // Verify admin authentication
+        const auth = await verifyAdminAuth(request);
+        if (!auth.authenticated) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { searchParams } = new URL(request.url);
         const action = searchParams.get('action') || 'data';
         const pagePath = searchParams.get('pagePath');

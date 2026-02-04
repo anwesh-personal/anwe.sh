@@ -1,21 +1,17 @@
 /**
  * Leads API Endpoint
  * Create and manage leads with AI scoring
+ * POST: Public (for lead capture forms)
+ * GET/PUT: Requires admin authentication
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
-// Lazy initialization to avoid build-time errors
-function getSupabase(): SupabaseClient {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Missing Supabase environment variables');
-    }
-
-    return createClient(supabaseUrl, supabaseServiceKey);
+// Alias for backward compatibility
+function getSupabase() {
+    return getSupabaseAdmin();
 }
 
 // AI Lead Scoring based on behavior signals
@@ -258,8 +254,14 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Get leads (admin only - TODO: add auth)
+// Get leads (admin only)
 export async function GET(request: NextRequest) {
+    // Verify admin authentication for GET
+    const auth = await verifyAdminAuth(request);
+    if (!auth.authenticated) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
 
@@ -320,9 +322,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ leads: data });
 }
 
-// Update lead (status, notes, etc.)
+// Update lead (status, notes, etc.) - Admin only
 export async function PUT(request: NextRequest) {
     try {
+        // Verify admin authentication for PUT
+        const auth = await verifyAdminAuth(request);
+        if (!auth.authenticated) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { id, ...updates } = body;
 

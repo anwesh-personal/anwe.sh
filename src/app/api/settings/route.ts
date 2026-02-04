@@ -1,25 +1,15 @@
 /**
  * Settings API
  * Server-side endpoint for managing site settings (bypasses RLS with service role)
+ * GET: Public (for frontend to fetch settings)
+ * POST: Requires admin authentication
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
-// Lazy-initialized service role client
-let _supabaseAdmin: SupabaseClient | null = null;
-
-function getSupabaseAdmin(): SupabaseClient {
-    if (!_supabaseAdmin) {
-        _supabaseAdmin = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
-    }
-    return _supabaseAdmin;
-}
-
-// GET: Fetch settings
+// GET: Fetch settings (public - needed for SSR)
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
@@ -64,9 +54,15 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST: Update setting
+// POST: Update setting (admin only)
 export async function POST(request: NextRequest) {
     try {
+        // Verify admin authentication
+        const auth = await verifyAdminAuth(request);
+        if (!auth.authenticated) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { key, value } = body;
 
