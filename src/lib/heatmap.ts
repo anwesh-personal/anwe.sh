@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase';
+import { adminFetch } from './admin-fetch';
 
 // Types
 export interface HeatmapEvent {
@@ -224,7 +225,7 @@ export async function getSessionStats(days: number = 30): Promise<{
     deviceBreakdown: Record<string, number>;
 }> {
     try {
-        const response = await fetch(`/api/heatmaps?action=stats&days=${days}`);
+        const response = await adminFetch(`/api/heatmaps?action=stats&days=${days}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch session stats');
@@ -316,7 +317,7 @@ export async function getHeatmapData(
             params.set('deviceType', options.deviceType);
         }
 
-        const response = await fetch(`/api/heatmaps?${params}`);
+        const response = await adminFetch(`/api/heatmaps?${params}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch heatmap data');
@@ -350,7 +351,7 @@ export async function getScrollDepthData(
             params.set('endDate', options.endDate.toISOString());
         }
 
-        const response = await fetch(`/api/heatmaps?${params}`);
+        const response = await adminFetch(`/api/heatmaps?${params}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch scroll depth data');
@@ -425,7 +426,7 @@ export async function getLeads(options: {
         if (status) params.set('status', status);
         if (classification) params.set('classification', classification);
 
-        const response = await fetch(`/api/leads?${params}`);
+        const response = await adminFetch(`/api/leads?${params}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch leads');
@@ -447,7 +448,7 @@ export async function updateLead(
     updates: Partial<Lead>
 ): Promise<Lead | null> {
     try {
-        const response = await fetch('/api/leads', {
+        const response = await adminFetch('/api/leads', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: leadId, ...updates })
@@ -478,7 +479,7 @@ export async function getLeadStats(): Promise<{
     avgScore: number;
 }> {
     try {
-        const response = await fetch('/api/leads?action=stats');
+        const response = await adminFetch('/api/leads?action=stats');
 
         if (!response.ok) {
             throw new Error('Failed to fetch lead stats');

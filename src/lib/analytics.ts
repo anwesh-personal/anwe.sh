@@ -4,7 +4,9 @@
  */
 
 import { supabase } from './supabase';
+import { adminFetch } from './admin-fetch';
 import type { AnalyticsSummary, DeviceType } from '@/types';
+
 
 /**
  * Get analytics summary for a date range
@@ -20,7 +22,7 @@ export async function getAnalyticsSummary(
             endDate: endDate.toISOString()
         });
 
-        const response = await fetch(`/api/analytics?${params}`);
+        const response = await adminFetch(`/api/analytics?${params}`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch analytics');
