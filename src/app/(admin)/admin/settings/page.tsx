@@ -71,18 +71,21 @@ export default function SettingsPage() {
     // Load site settings
     useEffect(() => {
         const loadSettings = async () => {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('key, value');
+            try {
+                const res = await fetch('/api/settings');
+                const json = await res.json();
 
-            if (data) {
-                const newSettings = { ...settings };
-                data.forEach(row => {
-                    if (row.key in newSettings) {
-                        (newSettings as Record<string, string>)[row.key] = row.value;
-                    }
-                });
-                setSettings(newSettings);
+                if (json.settings) {
+                    const newSettings = { ...settings };
+                    json.settings.forEach((row: { key: string; value: string }) => {
+                        if (row.key in newSettings) {
+                            (newSettings as Record<string, string>)[row.key] = row.value;
+                        }
+                    });
+                    setSettings(newSettings);
+                }
+            } catch (error) {
+                console.error('Failed to load settings:', error);
             }
         };
         loadSettings();
@@ -144,15 +147,22 @@ export default function SettingsPage() {
     const handleSaveSettings = async () => {
         setSaving(true);
 
-        // Save each setting
-        for (const [key, value] of Object.entries(settings)) {
-            await supabase
-                .from('site_settings')
-                .upsert({ key, value }, { onConflict: 'key' });
+        try {
+            // Save each setting via API
+            for (const [key, value] of Object.entries(settings)) {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value })
+                });
+            }
+            showMessage('success', 'Settings saved successfully');
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            showMessage('error', 'Failed to save settings');
         }
 
         setSaving(false);
-        showMessage('success', 'Settings saved successfully');
     };
 
     const tabs: { id: SettingsTab; label: string; icon: string }[] = [
