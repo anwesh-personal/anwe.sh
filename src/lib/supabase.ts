@@ -357,7 +357,8 @@ export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boole
         const response = await fetch('/api/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: 'theme', value: theme })
+            body: JSON.stringify({ key: 'theme', value: theme }),
+            credentials: 'include'  // Include auth cookies
         });
 
         if (!response.ok) {
@@ -372,4 +373,5 @@ export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boole
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }
+
 
