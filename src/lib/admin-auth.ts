@@ -30,20 +30,45 @@ export async function verifyAdminAuth(request: NextRequest): Promise<{
 
         // Or try to get from supabase auth cookie
         if (!accessToken && cookieHeader) {
-            // Supabase stores auth in sb-<project>-auth-token cookie
             const cookies = cookieHeader.split(';').map(c => c.trim());
-            const authCookie = cookies.find(c => c.includes('auth-token'));
 
-            if (authCookie) {
+            // Supabase may chunk large cookies: sb-xxx-auth-token.0, sb-xxx-auth-token.1, etc.
+            // Or store as single sb-xxx-auth-token cookie
+            const authCookies = cookies.filter(c => c.includes('auth-token'));
+
+            if (authCookies.length > 0) {
                 try {
-                    const cookieValue = authCookie.split('=')[1];
-                    if (cookieValue) {
-                        const decoded = decodeURIComponent(cookieValue);
-                        const parsed = JSON.parse(decoded);
-                        accessToken = parsed.access_token || parsed[0]?.access_token;
+                    // Sort to ensure proper order for chunked cookies
+                    authCookies.sort();
+
+                    // Combine all auth cookie values
+                    let combinedValue = '';
+                    for (const cookie of authCookies) {
+                        const eqIndex = cookie.indexOf('=');
+                        if (eqIndex > -1) {
+                            combinedValue += cookie.substring(eqIndex + 1);
+                        }
                     }
-                } catch {
-                    // Cookie parsing failed
+
+                    if (combinedValue) {
+                        const decoded = decodeURIComponent(combinedValue);
+                        // Try parsing as JSON
+                        try {
+                            const parsed = JSON.parse(decoded);
+                            accessToken = parsed.access_token || parsed[0]?.access_token;
+                        } catch {
+                            // Might be base64 encoded or different format
+                            // Try parsing the first chunk as JSON directly
+                            const firstCookieValue = authCookies[0].split('=')[1];
+                            if (firstCookieValue) {
+                                const firstDecoded = decodeURIComponent(firstCookieValue);
+                                const firstParsed = JSON.parse(firstDecoded);
+                                accessToken = firstParsed.access_token || firstParsed[0]?.access_token;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Cookie parsing failed:', e);
                 }
             }
         }
@@ -51,6 +76,7 @@ export async function verifyAdminAuth(request: NextRequest): Promise<{
         if (!accessToken) {
             return { authenticated: false, error: 'No authentication token provided' };
         }
+
 
         // Verify the token with Supabase
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
