@@ -174,23 +174,53 @@ export default function LeadsPage() {
                         </div>
                         <h3>No Leads Yet</h3>
                         <p>
-                            Leads will appear here when visitors submit contact forms,
-                            sign up for newsletters, or take other conversion actions.
+                            Lead capture is active on your site. When visitors interact with the
+                            popup or submit forms, leads will appear here with AI scoring.
                         </p>
-                        <div className="empty-tips">
-                            <div className="tip">
-                                <span className="tip-icon">📝</span>
-                                <span>Add a contact form to your site</span>
-                            </div>
-                            <div className="tip">
-                                <span className="tip-icon">📧</span>
-                                <span>Set up newsletter signup</span>
-                            </div>
-                            <div className="tip">
-                                <span className="tip-icon">🤖</span>
-                                <span>AI will automatically score and classify leads</span>
-                            </div>
+                        <div className="empty-actions">
+                            <button
+                                className="btn-primary"
+                                onClick={async () => {
+                                    try {
+                                        const testLead = {
+                                            email: `test-${Date.now()}@example.com`,
+                                            name: 'Test Lead',
+                                            company: 'Test Company',
+                                            source: 'manual_test',
+                                            sourcePage: '/admin/leads',
+                                            sessionId: 'test-session'
+                                        };
+                                        const response = await fetch('/api/leads', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(testLead)
+                                        });
+                                        if (response.ok) {
+                                            loadData();
+                                        } else {
+                                            const err = await response.json();
+                                            alert('Error: ' + (err.error || 'Failed to create test lead'));
+                                        }
+                                    } catch (error) {
+                                        console.error('Test lead error:', error);
+                                        alert('Failed to create test lead');
+                                    }
+                                }}
+                            >
+                                ➕ Create Test Lead
+                            </button>
+                            <a
+                                href="/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-secondary"
+                            >
+                                🔗 Visit Site (trigger popup)
+                            </a>
                         </div>
+                        <p className="empty-hint" style={{ marginTop: '1.5rem', opacity: 0.6, fontSize: '0.875rem' }}>
+                            💡 The lead capture popup appears when visitors try to leave the page (exit intent).
+                        </p>
                     </div>
                 </div>
             ) : (
@@ -549,24 +579,46 @@ export default function LeadsPage() {
                     line-height: 1.6;
                 }
 
-                .empty-tips {
+                .empty-actions {
                     display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                    text-align: left;
+                    gap: 1rem;
+                    justify-content: center;
+                    flex-wrap: wrap;
                 }
 
-                .tip {
-                    display: flex;
+                .empty-actions .btn-primary,
+                .empty-actions .btn-secondary {
+                    display: inline-flex;
                     align-items: center;
-                    gap: 0.75rem;
-                    padding: 0.75rem 1rem;
-                    background: var(--color-background);
+                    gap: 0.5rem;
+                    padding: 0.75rem 1.5rem;
                     border-radius: var(--radius-md);
+                    font-weight: 500;
+                    text-decoration: none;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
                 }
 
-                .tip-icon {
-                    font-size: 1.25rem;
+                .empty-actions .btn-primary {
+                    background: var(--color-accent-gradient);
+                    color: var(--color-background);
+                    border: none;
+                }
+
+                .empty-actions .btn-primary:hover {
+                    box-shadow: var(--shadow-glow);
+                    transform: translateY(-1px);
+                }
+
+                .empty-actions .btn-secondary {
+                    background: var(--color-surface);
+                    color: var(--color-foreground);
+                    border: 1px solid var(--color-border);
+                }
+
+                .empty-actions .btn-secondary:hover {
+                    background: var(--color-surface-hover);
+                    border-color: var(--color-border-hover);
                 }
 
                 .filters-bar {
