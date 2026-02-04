@@ -2,31 +2,43 @@
 
 /* =====================================================
    ANWE.SH DESIGN SYSTEM
-   Theme: Slate & Gold | Typography: Sans/Mono
+   Theme-Aware: Uses dynamic theme variables from ThemeProvider
    ===================================================== */
 
 @layer base {
   :root {
-    /* Core Colors */
-    --black: #0a0a0a;
-    --charcoal: #111111;
-    --dark-gray: #1a1a1a;
+    /* Fallback colors - overridden by ThemeProvider */
+    --color-background: #0a0a0a;
+    --color-background-secondary: #111111;
+    --color-background-tertiary: #1a1a1a;
+    --color-surface: #111111;
+    --color-surface-hover: #1a1a1a;
+    --color-foreground: #ffffff;
+    --color-foreground-secondary: #a8a8a8;
+    --color-foreground-muted: #666666;
+    --color-accent-start: #11998E;
+    --color-accent-end: #38EF7D;
+    --color-accent-solid: #22c997;
+    --color-accent-gradient: linear-gradient(135deg, #11998E, #38EF7D);
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-hover: rgba(17, 153, 142, 0.5);
+    --color-glow-primary: rgba(17, 153, 142, 0.4);
+    --color-glow-secondary: rgba(56, 239, 125, 0.3);
 
-    /* Accent - Emerald (Teal to Lime) */
-    --accent-primary: #11998E;
-    --accent-secondary: #38EF7D;
-    --accent-gradient: linear-gradient(135deg, #11998E, #38EF7D);
-    --accent-glow-1: rgba(17, 153, 142, 0.2);
-    --accent-glow-2: rgba(56, 239, 125, 0.15);
-
-    /* Text */
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
-    --text-muted: #666666;
-
-    /* Borders */
-    --border: rgba(255, 255, 255, 0.06);
-    --border-accent: rgba(17, 153, 142, 0.3);
+    /* Legacy aliases for compatibility */
+    --black: var(--color-background);
+    --charcoal: var(--color-background-secondary);
+    --dark-gray: var(--color-background-tertiary);
+    --accent-primary: var(--color-accent-start);
+    --accent-secondary: var(--color-accent-end);
+    --accent-gradient: var(--color-accent-gradient);
+    --accent-glow-1: var(--color-glow-primary);
+    --accent-glow-2: var(--color-glow-secondary);
+    --text-primary: var(--color-foreground);
+    --text-secondary: var(--color-foreground-secondary);
+    --text-muted: var(--color-foreground-muted);
+    --border: var(--color-border);
+    --border-accent: var(--color-border-hover);
   }
 
   * {
@@ -41,8 +53,8 @@
 
   body {
     font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--black);
-    color: var(--text-primary);
+    background: var(--color-background);
+    color: var(--color-foreground);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -65,8 +77,8 @@
   }
 
   ::selection {
-    background: var(--accent-primary);
-    color: var(--black);
+    background: var(--color-accent-start);
+    color: var(--color-background);
   }
 
   ::-webkit-scrollbar {
@@ -74,11 +86,11 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--charcoal);
+    background: var(--color-background-secondary);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
+    background: var(--color-foreground-muted);
     border-radius: 3px;
   }
 }
