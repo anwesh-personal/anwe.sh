@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
                     pageViewEvents.push({
                         session_id: event.data.sessionId,
                         page_path: event.data.pagePath,
-                        referrer: document?.referrer || null
+                        referrer: event.data.referrer || null
                     });
                     break;
 

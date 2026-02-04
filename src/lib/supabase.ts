@@ -193,86 +193,75 @@ export async function getFeaturedPosts(): Promise<BlogPost[]> {
 }
 
 // =====================================================
-// ADMIN FUNCTIONS (require auth)
+// ADMIN FUNCTIONS (require auth) - Use API to bypass RLS
 // =====================================================
 
 // Get ALL posts (including drafts) for admin
 export async function getAllPostsAdmin(): Promise<BlogPost[]> {
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-    if (error) {
+    try {
+        const response = await fetch('/api/posts');
+        const json = await response.json();
+        return json.posts || [];
+    } catch (error) {
         console.error('Error fetching all posts:', error);
         return [];
     }
-
-    return data || [];
 }
 
 // Get a single post by ID (for editing)
 export async function getPostById(id: string): Promise<BlogPost | null> {
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch(`/api/posts?id=${id}`);
+        const json = await response.json();
+        return json.post || null;
+    } catch (error) {
         console.error('Error fetching post by ID:', error);
         return null;
     }
-
-    return data;
 }
 
 // Create a new post
 export async function createPost(post: Partial<BlogPost>): Promise<BlogPost | null> {
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .insert([post])
-        .select()
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch('/api/posts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(post)
+        });
+        const json = await response.json();
+        return json.post || null;
+    } catch (error) {
         console.error('Error creating post:', error);
         return null;
     }
-
-    return data;
 }
 
 // Update a post
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
-    const { data, error } = await supabase
-        .from('blog_posts')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-    if (error) {
+    try {
+        const response = await fetch('/api/posts', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updates })
+        });
+        const json = await response.json();
+        return json.post || null;
+    } catch (error) {
         console.error('Error updating post:', error);
         return null;
     }
-
-    return data;
 }
 
 // Delete a post
 export async function deletePost(id: string): Promise<boolean> {
-    const { error } = await supabase
-        .from('blog_posts')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
+    try {
+        const response = await fetch(`/api/posts?id=${id}`, { method: 'DELETE' });
+        const json = await response.json();
+        return json.success || false;
+    } catch (error) {
         console.error('Error deleting post:', error);
         return false;
     }
-
-    return true;
 }
 
 // Publish a post
