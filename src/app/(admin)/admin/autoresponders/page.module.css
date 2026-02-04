@@ -1,0 +1,609 @@
+/* Autoresponders Admin Page Styles */
+
+/* Tabs */
+.arTabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+}
+
+.arTab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--color-foreground-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: all 0.2s;
+}
+
+.arTab:hover {
+    color: var(--color-foreground);
+    background: var(--color-surface);
+}
+
+.arTabActive {
+    color: var(--color-accent);
+    background: var(--color-surface);
+    border-bottom: 2px solid var(--color-accent);
+}
+
+/* Section Header */
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.sectionHeader h2 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.sectionHeader p {
+    margin: 0.25rem 0 0;
+    color: var(--color-foreground-secondary);
+    font-size: 0.9rem;
+}
+
+/* Integration Cards */
+.integrationsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+}
+
+.integrationCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.2s;
+}
+
+.integrationCard:hover {
+    border-color: var(--color-border-hover);
+}
+
+.integrationCardInactive {
+    opacity: 0.6;
+}
+
+.integrationHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.providerBadge {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.integrationMeta h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.providerName {
+    color: var(--color-foreground-secondary);
+    font-size: 0.85rem;
+}
+
+.defaultBadge {
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-accent);
+    color: var(--color-background);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.integrationStats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.statValue {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: var(--color-foreground-secondary);
+    text-transform: uppercase;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-error);
+}
+
+.statusDotVerified {
+    background: var(--color-success);
+}
+
+.integrationError {
+    padding: 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.375rem;
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.integrationActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Provider Selection Grid */
+.providerGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.providerCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.providerCard:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.providerIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.providerCard .providerName {
+    font-weight: 600;
+    color: var(--color-foreground);
+}
+
+.providerDesc {
+    font-size: 0.8rem;
+    color: var(--color-foreground-secondary);
+}
+
+/* Integration Form */
+.integrationForm,
+.embedForm {
+    max-width: 640px;
+}
+
+.selectedProvider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.selectedProvider p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--color-foreground-secondary);
+}
+
+.formSection {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.formSection h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup:last-child {
+    margin-bottom: 0;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.formGroup .hint {
+    font-weight: 400;
+    color: var(--color-foreground-secondary);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-foreground);
+    font-size: 0.95rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.checkboxGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.checkboxGroup input[type="checkbox"] {
+    width: auto;
+}
+
+.formActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.formActionsPrimary {
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    margin-top: 1.5rem;
+}
+
+.loadingLists {
+    padding: 1rem;
+    text-align: center;
+    color: var(--color-foreground-secondary);
+}
+
+.oauthNotice {
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.5rem;
+}
+
+.oauthNotice p {
+    margin: 0;
+    color: #f59e0b;
+}
+
+/* Render Mode Options */
+.renderModeOptions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.modeOption {
+    display: block;
+    padding: 1.25rem;
+    background: var(--color-background);
+    border: 2px solid var(--color-border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modeOption:hover {
+    border-color: var(--color-border-hover);
+}
+
+.modeOptionSelected {
+    border-color: var(--color-accent);
+    background: rgba(52, 211, 153, 0.05);
+}
+
+.modeOption input {
+    display: none;
+}
+
+.modeContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.modeIcon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modeContent p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-foreground-secondary);
+}
+
+/* Form Embeds Grid */
+.formsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+.formEmbedCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+}
+
+.formEmbedCardInactive {
+    opacity: 0.6;
+}
+
+.embedHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.embedHeader h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.modeBadge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.modeBadgeStripDesign {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.modeBadgeUseOriginal {
+    background: rgba(99, 102, 241, 0.15);
+    color: #6366f1;
+}
+
+.embedMeta {
+    display: flex;
+    gap: 1rem;
+    color: var(--color-foreground-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.embedStats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1rem;
+}
+
+.embedActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Empty State */
+.emptyCard {
+    text-align: center;
+    padding: 3rem;
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: 0.75rem;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.emptyCard h3 {
+    margin: 0 0 0.5rem;
+}
+
+.emptyCard p {
+    color: var(--color-foreground-secondary);
+    margin: 0 0 1.5rem;
+}
+
+/* Loading State */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    z-index: 100;
+    animation: slideIn 0.3s ease;
+}
+
+.toastSuccess {
+    background: var(--color-success);
+    color: white;
+}
+
+.toastError {
+    background: var(--color-error);
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary, var(--color-accent)));
+    color: var(--color-background);
+}
+
+.btnPrimary:hover {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+}
+
+.btnSecondary {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-foreground);
+}
+
+.btnSecondary:hover {
+    border-color: var(--color-accent);
+}
+
+.btnGhost {
+    background: transparent;
+    color: var(--color-foreground-secondary);
+}
+
+.btnGhost:hover {
+    background: var(--color-surface);
+    color: var(--color-foreground);
+}
+
+.btnDanger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.btnSm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .integrationsGrid,
+    .formsGrid,
+    .providerGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+
+    .renderModeOptions {
+        grid-template-columns: 1fr;
+    }
+}
