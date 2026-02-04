@@ -354,11 +354,24 @@ export async function getGlobalTheme(): Promise<ThemeName> {
 // Set global site theme via API (admin only)
 export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boolean; error?: string }> {
     try {
+        // Get current session to send auth token
+        const client = createBrowserClient(supabaseUrl, supabaseAnonKey);
+        const { data: { session } } = await client.auth.getSession();
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+        };
+
+        // Add auth token if we have a session
+        if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+
         const response = await fetch('/api/settings', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ key: 'theme', value: theme }),
-            credentials: 'include'  // Include auth cookies
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -373,5 +386,6 @@ export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boole
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }
+
 
 
