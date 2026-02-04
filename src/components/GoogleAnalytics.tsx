@@ -1,0 +1,37 @@
+'use client';
+
+/**
+ * Google Analytics Component
+ * Injects GA4 tracking script if googleAnalyticsId is configured
+ */
+
+import Script from 'next/script';
+
+interface GoogleAnalyticsProps {
+    gaId?: string;
+}
+
+export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
+    if (!gaId) {
+        return null;
+    }
+
+    return (
+        <>
+            <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+                {`
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${gaId}');
+                `}
+            </Script>
+        </>
+    );
+}
+
+export default GoogleAnalytics;

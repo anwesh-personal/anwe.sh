@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { getSettings } from "@/lib/settings.server";
 
 // Typography - Modern Sans/Mono Stack
 const inter = Inter({
@@ -22,75 +23,92 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-// SEO Metadata
-export const metadata: Metadata = {
-  metadataBase: new URL("https://anwe.sh"),
-  title: {
-    default: "Anwesh Rath - Systems Architect & Enterprise Builder",
-    template: "%s | Anwesh Rath",
-  },
-  description:
-    "17+ years architecting enterprise solutions, AI systems, and automation that transforms how businesses scale and dominate.",
-  keywords: [
-    "systems architect",
-    "enterprise builder",
-    "AI systems",
-    "automation",
-    "SaaS architecture",
-    "product builder",
-    "Anwesh Rath",
-  ],
-  authors: [{ name: "Anwesh Rath", url: "https://anwe.sh" }],
-  creator: "Anwesh Rath",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://anwe.sh",
-    siteName: "Anwesh Rath",
-    title: "Anwesh Rath - Systems Architect & Enterprise Builder",
-    description:
-      "17+ years architecting enterprise solutions, AI systems, and automation that transforms how businesses scale.",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Anwesh Rath - Systems Architect",
-      },
+// Dynamic SEO Metadata from settings
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+
+  const title = settings.defaultMetaTitle || settings.siteName || "Anwesh Rath";
+  const description = settings.defaultMetaDescription || settings.siteDescription ||
+    "17+ years architecting enterprise solutions, AI systems, and automation.";
+  const siteName = settings.siteName || "Anwesh Rath";
+  const ogImage = settings.defaultOgImage || "/og.png";
+
+  return {
+    metadataBase: new URL("https://anwe.sh"),
+    title: {
+      default: title,
+      template: `%s | ${siteName}`,
+    },
+    description,
+    keywords: [
+      "systems architect",
+      "enterprise builder",
+      "AI systems",
+      "automation",
+      "SaaS architecture",
+      "product builder",
+      siteName,
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Anwesh Rath - Systems Architect & Enterprise Builder",
-    description:
-      "17+ years architecting enterprise solutions, AI systems, and automation.",
-    images: ["/og.png"],
-    creator: "@anweshrath",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name: siteName, url: "https://anwe.sh" }],
+    creator: siteName,
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: "https://anwe.sh",
+      siteName,
+      title,
+      description,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${siteName} - Systems Architect`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+      creator: settings.socialTwitter ? `@${settings.socialTwitter.replace('@', '').replace('https://twitter.com/', '').replace('https://x.com/', '')}` : "@anweshrath",
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-};
+  };
+}
 
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { LeadCapture } from '@/components/LeadCapture';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch settings for GA and custom code
+  const settings = await getSettings();
+
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        {/* Inject custom head code if configured */}
+        {settings.customHeadCode && (
+          <script dangerouslySetInnerHTML={{ __html: settings.customHeadCode }} />
+        )}
+      </head>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
       >
@@ -104,9 +122,18 @@ export default function RootLayout({
             subtitle="Get insights on AI systems and enterprise architecture delivered to your inbox."
           />
         </ThemeProvider>
+
+        {/* Google Analytics */}
+        <GoogleAnalytics gaId={settings.googleAnalyticsId} />
+
+        {/* Inject custom body code if configured */}
+        {settings.customBodyCode && (
+          <script dangerouslySetInnerHTML={{ __html: settings.customBodyCode }} />
+        )}
       </body>
     </html>
   );
 }
+
 
 
