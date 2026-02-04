@@ -4,8 +4,8 @@ import { getAllPosts, getPostBySlug } from '@/lib/supabase';
 import { Navigation } from '@/components/marketing/Navigation';
 import { Footer } from '@/components/marketing/Footer';
 
-// Revalidate every 60 seconds
-export const revalidate = 60;
+// Force dynamic rendering for theme sync
+export const dynamic = 'force-dynamic';
 
 // Generate static params for all posts
 export async function generateStaticParams() {

@@ -8,8 +8,8 @@ export const metadata = {
     description: 'Thoughts on AI systems, enterprise architecture, and building products that scale.',
 };
 
-// Revalidate every 60 seconds
-export const revalidate = 60;
+// Force dynamic rendering for theme sync
+export const dynamic = 'force-dynamic';
 
 export default async function BlogPage() {
     const posts = await getAllPosts();

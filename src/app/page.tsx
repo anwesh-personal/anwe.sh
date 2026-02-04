@@ -8,6 +8,9 @@ import {
   Footer,
 } from '@/components/marketing';
 
+// Force dynamic rendering for theme to load from database
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <>
