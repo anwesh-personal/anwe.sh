@@ -73,24 +73,49 @@ const PROVIDER_CONFIGS: Record<string, {
         name: 'Anthropic',
         validateEndpoint: async (key) => {
             try {
-                const client = new Anthropic({ apiKey: key });
-                await client.messages.create({
-                    model: 'claude-3-haiku-20240307',
-                    max_tokens: 1,
-                    messages: [{ role: 'user', content: 'Hi' }]
+                // Validate by calling messages.count_tokens (doesn't consume credits)
+                const response = await fetch('https://api.anthropic.com/v1/messages/count_tokens', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': key,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-latest',
+                        messages: [{ role: 'user', content: 'test' }]
+                    })
                 });
-                return { valid: true, models: ['claude-3-5-sonnet-latest', 'claude-3-opus-latest', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'] };
-            } catch (e: unknown) {
-                const error = e as { message?: string; status?: number };
-                if (error.status === 400) {
-                    return { valid: true, models: ['claude-3-5-sonnet-latest', 'claude-3-opus-latest', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'] };
+
+                if (response.ok || response.status === 400) {
+                    // 400 = invalid request but valid key, still counts as valid
+                    // Latest Claude models from Anthropic docs
+                    return {
+                        valid: true,
+                        models: [
+                            'claude-sonnet-4-20250514',
+                            'claude-3-5-sonnet-latest',
+                            'claude-3-5-haiku-latest',
+                            'claude-3-opus-latest',
+                            'claude-3-sonnet-20240229',
+                            'claude-3-haiku-20240307'
+                        ]
+                    };
                 }
+                const error = await response.json();
+                return { valid: false, error: error.error?.message || 'Invalid API key' };
+            } catch (e: unknown) {
+                const error = e as Error;
                 return { valid: false, error: error.message || 'Invalid API key' };
             }
         },
         getModels: async () => {
+            // Anthropic doesn't have a public models list API
+            // These are the current production models from their documentation
             return [
+                { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', context: 200000 },
                 { id: 'claude-3-5-sonnet-latest', name: 'Claude 3.5 Sonnet', context: 200000 },
+                { id: 'claude-3-5-haiku-latest', name: 'Claude 3.5 Haiku', context: 200000 },
                 { id: 'claude-3-opus-latest', name: 'Claude 3 Opus', context: 200000 },
                 { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', context: 200000 },
                 { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', context: 200000 }
@@ -101,21 +126,43 @@ const PROVIDER_CONFIGS: Record<string, {
         name: 'Google AI',
         validateEndpoint: async (key) => {
             try {
-                const genAI = new GoogleGenerativeAI(key);
-                const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                await model.generateContent('Hi');
-                return { valid: true, models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'] };
+                // Use the models.list endpoint to validate key and get models
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
+                );
+                if (!response.ok) {
+                    const error = await response.json();
+                    return { valid: false, error: error.error?.message || 'Invalid API key' };
+                }
+                const data = await response.json();
+                const models = data.models
+                    ?.filter((m: { supportedGenerationMethods?: string[] }) =>
+                        m.supportedGenerationMethods?.includes('generateContent'))
+                    .map((m: { name: string }) => m.name.replace('models/', '')) || [];
+                return { valid: true, models };
             } catch (e: unknown) {
                 const error = e as Error;
                 return { valid: false, error: error.message || 'Invalid API key' };
             }
         },
-        getModels: async () => {
-            return [
-                { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', context: 2000000 },
-                { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', context: 1000000 },
-                { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', context: 1000000 }
-            ];
+        getModels: async (key) => {
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
+                );
+                if (!response.ok) return [];
+                const data = await response.json();
+                return data.models
+                    ?.filter((m: { supportedGenerationMethods?: string[] }) =>
+                        m.supportedGenerationMethods?.includes('generateContent'))
+                    .map((m: { name: string; displayName?: string; inputTokenLimit?: number }) => ({
+                        id: m.name.replace('models/', ''),
+                        name: m.displayName || m.name.replace('models/', ''),
+                        context: m.inputTokenLimit || 0
+                    })) || [];
+            } catch {
+                return [];
+            }
         }
     },
     groq: {
