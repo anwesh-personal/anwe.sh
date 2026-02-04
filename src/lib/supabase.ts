@@ -346,38 +346,41 @@ export function calculateReadingTime(content: string): string {
 
 import type { ThemeName } from './themes';
 
-// Get global site theme
+// Get global site theme via API
 export async function getGlobalTheme(): Promise<ThemeName> {
-    const { data, error } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'theme')
-        .single();
-
-    if (error || !data) {
-        return 'emerald-night'; // Default fallback
+    try {
+        const response = await fetch('/api/settings?key=theme');
+        if (!response.ok) {
+            console.error('Failed to fetch theme:', response.statusText);
+            return 'emerald-night';
+        }
+        const data = await response.json();
+        return (data.value as ThemeName) || 'emerald-night';
+    } catch (error) {
+        console.error('Failed to fetch global theme:', error);
+        return 'emerald-night';
     }
-
-    return data.value as ThemeName;
 }
 
-// Set global site theme (admin only)
+// Set global site theme via API (admin only)
 export async function setGlobalTheme(theme: ThemeName): Promise<{ success: boolean; error?: string }> {
-    const { error } = await supabase
-        .from('site_settings')
-        .upsert({
-            key: 'theme',
-            value: theme,
-            updated_at: new Date().toISOString()
-        }, {
-            onConflict: 'key'
+    try {
+        const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: 'theme', value: theme })
         });
 
-    if (error) {
-        console.error('Error setting global theme:', error);
-        return { success: false, error: error.message };
-    }
+        if (!response.ok) {
+            const data = await response.json();
+            console.error('Error setting global theme:', data.error);
+            return { success: false, error: data.error || response.statusText };
+        }
 
-    return { success: true };
+        return { success: true };
+    } catch (error) {
+        console.error('Error setting global theme:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
 }
 
