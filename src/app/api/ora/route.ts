@@ -3,6 +3,9 @@
  * Secure endpoint for external agent (ORA) to interact with anwe.sh
  * 
  * Authentication: Bearer token (ORA_SECRET in env)
+ * 
+ * GET - Returns API schema for autodiscovery (no auth required)
+ * POST - Execute actions (auth required)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,6 +31,223 @@ function validateOraAuth(request: NextRequest): boolean {
 
     const token = authHeader.substring(7);
     return token === process.env.ORA_SECRET;
+}
+
+// ============================================
+// API Schema Definition (Self-Describing)
+// ============================================
+
+const API_SCHEMA = {
+    name: 'anwe.sh ORA API',
+    version: '1.0.0',
+    description: 'External agent API for controlling anwe.sh',
+    authentication: {
+        type: 'bearer',
+        header: 'Authorization',
+        format: 'Bearer {ORA_SECRET}'
+    },
+    baseUrl: '/api/ora',
+    actions: {
+        // Posts
+        'posts.list': {
+            description: 'List blog posts',
+            params: {
+                status: { type: 'string', optional: true, enum: ['draft', 'published', 'archived'] },
+                limit: { type: 'number', optional: true, default: 20 },
+                offset: { type: 'number', optional: true, default: 0 }
+            },
+            returns: { posts: 'array', count: 'number' }
+        },
+        'posts.get': {
+            description: 'Get a single post by ID or slug',
+            params: {
+                id: { type: 'string', optional: true },
+                slug: { type: 'string', optional: true }
+            },
+            returns: { post: 'object' }
+        },
+        'posts.create': {
+            description: 'Create a new blog post',
+            params: {
+                title: { type: 'string', required: true },
+                content: { type: 'string', required: true },
+                excerpt: { type: 'string', optional: true },
+                slug: { type: 'string', optional: true },
+                status: { type: 'string', optional: true, default: 'draft' },
+                featured_image: { type: 'string', optional: true },
+                meta_title: { type: 'string', optional: true },
+                meta_description: { type: 'string', optional: true },
+                tags: { type: 'array', optional: true }
+            },
+            returns: { post: 'object', id: 'string' }
+        },
+        'posts.update': {
+            description: 'Update an existing post',
+            params: {
+                id: { type: 'string', required: true },
+                title: { type: 'string', optional: true },
+                content: { type: 'string', optional: true },
+                excerpt: { type: 'string', optional: true },
+                status: { type: 'string', optional: true },
+                featured_image: { type: 'string', optional: true }
+            },
+            returns: { post: 'object' }
+        },
+        'posts.delete': {
+            description: 'Delete a post',
+            params: { id: { type: 'string', required: true } },
+            returns: { success: 'boolean' }
+        },
+        'posts.publish': {
+            description: 'Publish a draft post',
+            params: { id: { type: 'string', required: true } },
+            returns: { post: 'object' }
+        },
+
+        // Analytics
+        'analytics.summary': {
+            description: 'Get analytics summary for date range',
+            params: {
+                startDate: { type: 'string', optional: true, format: 'ISO date' },
+                endDate: { type: 'string', optional: true, format: 'ISO date' },
+                days: { type: 'number', optional: true, default: 30 }
+            },
+            returns: { totalViews: 'number', uniqueVisitors: 'number', topPages: 'array' }
+        },
+        'analytics.pageviews': {
+            description: 'Get pageview data',
+            params: {
+                path: { type: 'string', optional: true },
+                days: { type: 'number', optional: true, default: 30 }
+            },
+            returns: { views: 'array' }
+        },
+        'analytics.heatmaps': {
+            description: 'Get heatmap data for a page',
+            params: {
+                pagePath: { type: 'string', required: true },
+                eventType: { type: 'string', optional: true, enum: ['click', 'move', 'scroll'] }
+            },
+            returns: { heatmapData: 'array' }
+        },
+
+        // Leads
+        'leads.list': {
+            description: 'List captured leads',
+            params: {
+                status: { type: 'string', optional: true },
+                limit: { type: 'number', optional: true, default: 50 },
+                offset: { type: 'number', optional: true, default: 0 }
+            },
+            returns: { leads: 'array', count: 'number' }
+        },
+        'leads.get': {
+            description: 'Get a single lead',
+            params: { id: { type: 'string', required: true } },
+            returns: { lead: 'object' }
+        },
+        'leads.update': {
+            description: 'Update lead status or notes',
+            params: {
+                id: { type: 'string', required: true },
+                status: { type: 'string', optional: true },
+                notes: { type: 'string', optional: true },
+                classification: { type: 'string', optional: true }
+            },
+            returns: { lead: 'object' }
+        },
+        'leads.analyze': {
+            description: 'AI-analyze a lead for scoring',
+            params: { id: { type: 'string', required: true } },
+            returns: { score: 'number', reasons: 'array' }
+        },
+
+        // Settings
+        'settings.get': {
+            description: 'Get site settings',
+            params: { key: { type: 'string', optional: true } },
+            returns: { settings: 'object' }
+        },
+        'settings.update': {
+            description: 'Update a setting',
+            params: {
+                key: { type: 'string', required: true },
+                value: { type: 'any', required: true }
+            },
+            returns: { success: 'boolean' }
+        },
+
+        // Memory (site-specific context ORA can store)
+        'memory.store': {
+            description: 'Store information about this site',
+            params: {
+                key: { type: 'string', required: true },
+                value: { type: 'any', required: true },
+                category: { type: 'string', optional: true }
+            },
+            returns: { success: 'boolean' }
+        },
+        'memory.recall': {
+            description: 'Recall stored information',
+            params: { key: { type: 'string', required: true } },
+            returns: { value: 'any', found: 'boolean' }
+        },
+        'memory.search': {
+            description: 'Search stored memories',
+            params: { query: { type: 'string', required: true } },
+            returns: { results: 'array' }
+        },
+        'memory.clear': {
+            description: 'Clear a stored memory',
+            params: { key: { type: 'string', required: true } },
+            returns: { success: 'boolean' }
+        },
+
+        // Files
+        'files.upload': {
+            description: 'Upload a file (base64)',
+            params: {
+                filename: { type: 'string', required: true },
+                content: { type: 'string', required: true, format: 'base64' },
+                folder: { type: 'string', optional: true }
+            },
+            returns: { url: 'string', path: 'string' }
+        },
+        'files.list': {
+            description: 'List files in storage',
+            params: { folder: { type: 'string', optional: true } },
+            returns: { files: 'array' }
+        },
+
+        // System
+        'system.status': {
+            description: 'Get system status and health',
+            params: {},
+            returns: { status: 'string', uptime: 'number', version: 'string' }
+        },
+        'system.log': {
+            description: 'Log an action (for audit trail)',
+            params: {
+                action: { type: 'string', required: true },
+                details: { type: 'object', optional: true }
+            },
+            returns: { logged: 'boolean' }
+        }
+    }
+};
+
+// ============================================
+// GET: Return API Schema (Autodiscovery)
+// ============================================
+
+export async function GET(request: NextRequest) {
+    // Return schema - no auth required for discovery
+    // ORA can call this to learn what actions are available
+    return NextResponse.json({
+        ...API_SCHEMA,
+        timestamp: new Date().toISOString(),
+        authenticated: validateOraAuth(request)
+    });
 }
 
 // ============================================
@@ -563,14 +783,3 @@ async function logAction(data: { action: string; details?: unknown }) {
     return NextResponse.json({ logged: true });
 }
 
-// ============================================
-// GET: Quick Status Check
-// ============================================
-
-export async function GET(request: NextRequest) {
-    if (!validateOraAuth(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    return getSystemStatus();
-}

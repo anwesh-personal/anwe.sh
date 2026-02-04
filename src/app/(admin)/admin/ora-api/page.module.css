@@ -1,0 +1,331 @@
+.container {
+    min-height: 100vh;
+    padding: 2rem;
+    background: var(--color-bg-primary);
+}
+
+.content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 4rem;
+    font-size: 1.2rem;
+}
+
+.error {
+    color: var(--color-error, #ff6b6b);
+}
+
+/* Connection Card */
+.connectionCard {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.connectionCard h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+.connectionDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    min-width: 80px;
+}
+
+.detail code {
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.05));
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+.exampleBox {
+    background: var(--color-bg-tertiary, rgba(0, 0, 0, 0.2));
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.exampleBox h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.exampleBox pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+/* Actions Section */
+.actionsSection {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.actionsSection h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+.categoriesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.categoryCard {
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.03));
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+}
+
+.categoryCard h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.categoryIcon {
+    font-size: 1.2rem;
+}
+
+.actionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.actionButton {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.actionButton:hover {
+    background: var(--color-bg-primary);
+    border-color: var(--color-accent);
+}
+
+.actionButton.selected {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.actionButton.selected .actionName,
+.actionButton.selected .actionDesc {
+    color: var(--color-bg-primary);
+}
+
+.actionName {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.actionDesc {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+/* Action Details */
+.actionDetails {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.actionDetails h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: var(--color-accent);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.actionDescription {
+    color: var(--color-text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.paramsSection,
+.returnsSection {
+    margin-bottom: 1.5rem;
+}
+
+.paramsSection h3,
+.returnsSection h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.noParams {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+.paramsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.paramsTable th,
+.paramsTable td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.paramsTable th {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    background: var(--color-bg-tertiary, rgba(0, 0, 0, 0.2));
+}
+
+.paramsTable code {
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.05));
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.paramInput {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+}
+
+.paramInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.returnsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.returnItem {
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.05));
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+}
+
+.returnItem code {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* Test Section */
+.testSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.testButton {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-accent-gradient, var(--color-accent));
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.testButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.testButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.testNote {
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+.testResult {
+    margin-top: 1.5rem;
+    background: var(--color-bg-tertiary, rgba(0, 0, 0, 0.2));
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.testResult h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.testResult pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+}
