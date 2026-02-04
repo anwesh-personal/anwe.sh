@@ -693,11 +693,22 @@ export default function AutorespondersPage() {
                         {(view === 'add' || view === 'edit') && (
                             <div>
                                 <div className={styles.sectionHeader}>
-                                    <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => { setView('list'); resetForm(); }}>
+                                    <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => {
+                                        if (selectedProvider) {
+                                            // If provider is selected, go back to provider selection
+                                            setSelectedProvider(null);
+                                            setProviderData(null);
+                                        } else {
+                                            // Otherwise go back to list
+                                            setView('list');
+                                            resetForm();
+                                        }
+                                    }}>
                                         ← Back
                                     </button>
-                                    <h2>{editingIntegration ? 'Edit Integration' : 'Add Integration'}</h2>
+                                    <h2>{editingIntegration ? 'Edit Integration' : (selectedProvider ? `Configure ${selectedProvider.name}` : 'Add Integration')}</h2>
                                 </div>
+
 
                                 {!selectedProvider ? (
                                     <div className={styles.providerGrid}>
