@@ -255,6 +255,29 @@ export default function AIProvidersPage() {
         return num.toLocaleString();
     };
 
+    // Provider-specific API key placeholders and hints
+    const getApiKeyPlaceholder = (type: string) => {
+        switch (type) {
+            case 'openai': return 'sk-proj-...';
+            case 'anthropic': return 'sk-ant-...';
+            case 'google': return 'AIza...';
+            case 'groq': return 'gsk_...';
+            case 'mistral': return 'Your Mistral API key';
+            default: return 'Enter API key';
+        }
+    };
+
+    const getApiKeyHint = (type: string) => {
+        switch (type) {
+            case 'openai': return 'Get your key at platform.openai.com/api-keys';
+            case 'anthropic': return 'Get your key at console.anthropic.com';
+            case 'google': return 'Get your key at makersuite.google.com/app/apikey';
+            case 'groq': return 'Get your key at console.groq.com/keys';
+            case 'mistral': return 'Get your key at console.mistral.ai';
+            default: return '';
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -539,7 +562,7 @@ export default function AIProvidersPage() {
                                             setFormApiKey(e.target.value);
                                             setValidationResult(null);
                                         }}
-                                        placeholder="sk-..."
+                                        placeholder={getApiKeyPlaceholder(formType)}
                                     />
                                     <button
                                         className="validate-btn"
@@ -549,15 +572,29 @@ export default function AIProvidersPage() {
                                         {validating ? 'Validating...' : 'Validate'}
                                     </button>
                                 </div>
+                                <span className="form-hint">{getApiKeyHint(formType)}</span>
                                 {validationResult && (
                                     <div className={`validation-result ${validationResult.valid ? 'success' : 'error'}`}>
                                         {validationResult.valid ? (
                                             <>
-                                                ✓ Valid! Found {validationResult.models?.length || 0} models
+                                                ✓ Valid API key! Found {validationResult.models?.length || 0} available models
                                             </>
                                         ) : (
                                             <>✕ {validationResult.error}</>
                                         )}
+                                    </div>
+                                )}
+                                {validationResult?.valid && validationResult.models && validationResult.models.length > 0 && (
+                                    <div className="models-preview">
+                                        <label>Available Models:</label>
+                                        <div className="models-list">
+                                            {validationResult.models.slice(0, 10).map(model => (
+                                                <span key={model} className="model-tag">{model}</span>
+                                            ))}
+                                            {validationResult.models.length > 10 && (
+                                                <span className="model-tag more">+{validationResult.models.length - 10} more</span>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -631,7 +668,7 @@ export default function AIProvidersPage() {
                                             setFormApiKey(e.target.value);
                                             setValidationResult(null);
                                         }}
-                                        placeholder="Enter new key to replace"
+                                        placeholder={getApiKeyPlaceholder(selectedProvider.provider_type)}
                                     />
                                     {formApiKey && (
                                         <button
@@ -643,6 +680,7 @@ export default function AIProvidersPage() {
                                         </button>
                                     )}
                                 </div>
+                                <span className="form-hint">{getApiKeyHint(selectedProvider.provider_type)}</span>
                                 {selectedProvider.has_api_key && !formApiKey && (
                                     <div className="current-key">
                                         Current: {selectedProvider.api_key_encrypted}
@@ -651,10 +689,23 @@ export default function AIProvidersPage() {
                                 {validationResult && (
                                     <div className={`validation-result ${validationResult.valid ? 'success' : 'error'}`}>
                                         {validationResult.valid ? (
-                                            <>✓ Valid! Found {validationResult.models?.length || 0} models</>
+                                            <>✓ Valid API key! Found {validationResult.models?.length || 0} available models</>
                                         ) : (
                                             <>✕ {validationResult.error}</>
                                         )}
+                                    </div>
+                                )}
+                                {validationResult?.valid && validationResult.models && validationResult.models.length > 0 && (
+                                    <div className="models-preview">
+                                        <label>Available Models:</label>
+                                        <div className="models-list">
+                                            {validationResult.models.slice(0, 10).map(model => (
+                                                <span key={model} className="model-tag">{model}</span>
+                                            ))}
+                                            {validationResult.models.length > 10 && (
+                                                <span className="model-tag more">+{validationResult.models.length - 10} more</span>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -1183,6 +1234,49 @@ export default function AIProvidersPage() {
                 .validation-result.error {
                     background: rgba(239, 68, 68, 0.1);
                     color: #ef4444;
+                }
+
+                .form-hint {
+                    display: block;
+                    margin-top: 0.375rem;
+                    font-size: 0.75rem;
+                    color: var(--color-foreground-muted);
+                }
+
+                .models-preview {
+                    margin-top: 0.75rem;
+                    padding: 0.75rem;
+                    background: var(--color-background);
+                    border-radius: var(--radius-md);
+                }
+
+                .models-preview label {
+                    font-size: 0.8rem;
+                    color: var(--color-foreground-secondary);
+                    margin-bottom: 0.5rem;
+                }
+
+                .models-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.375rem;
+                    margin-top: 0.5rem;
+                }
+
+                .model-tag {
+                    padding: 0.25rem 0.5rem;
+                    background: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-sm);
+                    font-size: 0.75rem;
+                    font-family: monospace;
+                    color: var(--color-foreground-secondary);
+                }
+
+                .model-tag.more {
+                    background: transparent;
+                    border-style: dashed;
+                    color: var(--color-foreground-muted);
                 }
 
                 .current-key {
