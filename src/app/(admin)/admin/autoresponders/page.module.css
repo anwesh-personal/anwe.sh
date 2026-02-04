@@ -547,17 +547,18 @@
 }
 
 .btnPrimary {
-    background: linear-gradient(135deg, #34d399, #10b981);
+    background: var(--color-accent-gradient);
     color: #000000;
     font-weight: 600;
     border: none;
 }
 
 .btnPrimary:hover {
-    background: linear-gradient(135deg, #4ade80, #34d399);
-    box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+    filter: brightness(1.1);
+    box-shadow: 0 0 20px rgba(17, 153, 142, 0.4);
     transform: translateY(-1px);
 }
+
 
 .btnSecondary {
     background: var(--color-surface);
