@@ -261,6 +261,38 @@ export async function POST(request: NextRequest) {
 // Get leads (admin only - TODO: add auth)
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
+    const action = searchParams.get('action');
+
+    // Stats endpoint
+    if (action === 'stats') {
+        const supabase = getSupabase();
+
+        const [totalResult, newResult, hotResult, warmResult, coldResult, convertedResult] = await Promise.all([
+            supabase.from('leads').select('*', { count: 'exact', head: true }),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('ai_classification', 'hot'),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('ai_classification', 'warm'),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('ai_classification', 'cold'),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'converted')
+        ]);
+
+        // Calculate average score
+        const { data: scores } = await supabase.from('leads').select('ai_score');
+        const avgScore = scores && scores.length > 0
+            ? Math.round(scores.reduce((sum, l) => sum + (l.ai_score || 0), 0) / scores.length)
+            : 0;
+
+        return NextResponse.json({
+            total: totalResult.count || 0,
+            new: newResult.count || 0,
+            hot: hotResult.count || 0,
+            warm: warmResult.count || 0,
+            cold: coldResult.count || 0,
+            converted: convertedResult.count || 0,
+            avgScore
+        });
+    }
+
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const status = searchParams.get('status');
@@ -287,3 +319,58 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ leads: data });
 }
+
+// Update lead (status, notes, etc.)
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { id, ...updates } = body;
+
+        if (!id) {
+            return NextResponse.json({ error: 'Lead ID is required' }, { status: 400 });
+        }
+
+        // Validate allowed update fields
+        const allowedFields = ['status', 'notes', 'ai_classification', 'contacted_at', 'converted_at'];
+        const filteredUpdates: Record<string, unknown> = {};
+
+        for (const [key, value] of Object.entries(updates)) {
+            if (allowedFields.includes(key)) {
+                filteredUpdates[key] = value;
+            }
+        }
+
+        // Add updated_at
+        filteredUpdates.updated_at = new Date().toISOString();
+
+        // Handle status-specific updates
+        if (filteredUpdates.status === 'contacted' && !filteredUpdates.contacted_at) {
+            filteredUpdates.contacted_at = new Date().toISOString();
+        }
+        if (filteredUpdates.status === 'converted' && !filteredUpdates.converted_at) {
+            filteredUpdates.converted_at = new Date().toISOString();
+        }
+
+        const { data, error } = await getSupabase()
+            .from('leads')
+            .update(filteredUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating lead:', error);
+            return NextResponse.json({ error: 'Failed to update lead' }, { status: 500 });
+        }
+
+        return NextResponse.json({ lead: data });
+
+    } catch (error) {
+        console.error('Lead PUT error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
+

@@ -1,5 +1,6 @@
 /**
  * Analytics Data Access Layer
+ * Uses /api/analytics for server-side aggregation (bypasses RLS)
  */
 
 import { supabase } from './supabase';
@@ -7,102 +8,45 @@ import type { AnalyticsSummary, DeviceType } from '@/types';
 
 /**
  * Get analytics summary for a date range
+ * Uses API route for RLS bypass with service role
  */
 export async function getAnalyticsSummary(
     startDate: Date,
     endDate: Date
 ): Promise<AnalyticsSummary> {
-    const startStr = startDate.toISOString();
-    const endStr = endDate.toISOString();
+    try {
+        const params = new URLSearchParams({
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
 
-    // Get total views
-    const { count: totalViews } = await supabase
-        .from('page_views')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startStr)
-        .lte('created_at', endStr);
+        const response = await fetch(`/api/analytics?${params}`);
 
-    // Get unique visitors (by visitor_hash)
-    const { data: visitors } = await supabase
-        .from('page_views')
-        .select('visitor_hash')
-        .gte('created_at', startStr)
-        .lte('created_at', endStr);
+        if (!response.ok) {
+            throw new Error('Failed to fetch analytics');
+        }
 
-    const uniqueVisitors = new Set(visitors?.map(v => v.visitor_hash).filter(Boolean)).size;
-
-    // Get top pages
-    const { data: pageData } = await supabase
-        .from('page_views')
-        .select('path')
-        .gte('created_at', startStr)
-        .lte('created_at', endStr);
-
-    const pageCounts = (pageData || []).reduce((acc, row) => {
-        acc[row.path] = (acc[row.path] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const topPages = Object.entries(pageCounts)
-        .map(([path, views]) => ({ path, views, change: 0 }))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 5);
-
-    // Get top sources
-    const { data: sourceData } = await supabase
-        .from('page_views')
-        .select('referrer')
-        .gte('created_at', startStr)
-        .lte('created_at', endStr);
-
-    const sourceCounts = (sourceData || []).reduce((acc, row) => {
-        const source = row.referrer ? extractDomain(row.referrer) : 'Direct';
-        acc[source] = (acc[source] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const totalSourceViews = Object.values(sourceCounts).reduce((a, b) => a + b, 0);
-    const topSources = Object.entries(sourceCounts)
-        .map(([source, visitors]) => ({
-            source,
-            visitors,
-            percent: totalSourceViews > 0 ? Math.round((visitors / totalSourceViews) * 100) : 0
-        }))
-        .sort((a, b) => b.visitors - a.visitors)
-        .slice(0, 5);
-
-    // Get device breakdown
-    const { data: deviceData } = await supabase
-        .from('page_views')
-        .select('device_type')
-        .gte('created_at', startStr)
-        .lte('created_at', endStr);
-
-    const deviceBreakdown = (deviceData || []).reduce((acc, row) => {
-        const type = (row.device_type || 'unknown') as DeviceType;
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-    }, {} as Record<DeviceType, number>);
-
-    // Get daily views
-    const dailyViews = await getDailyViews(startDate, endDate);
-
-    // Calculate avg session duration (placeholder - needs session tracking)
-    const avgSessionDuration = 145; // 2:25 - placeholder
-
-    // Calculate bounce rate (placeholder - needs session tracking)
-    const bounceRate = 42.5; // placeholder
-
-    return {
-        totalViews: totalViews || 0,
-        uniqueVisitors,
-        avgSessionDuration,
-        bounceRate,
-        topPages,
-        topSources,
-        deviceBreakdown,
-        dailyViews
-    };
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        // Return empty analytics on error
+        return {
+            totalViews: 0,
+            uniqueVisitors: 0,
+            avgSessionDuration: 0,
+            bounceRate: 0,
+            topPages: [],
+            topSources: [],
+            deviceBreakdown: {
+                desktop: 0,
+                mobile: 0,
+                tablet: 0,
+                bot: 0,
+                unknown: 0
+            },
+            dailyViews: []
+        };
+    }
 }
 
 /**

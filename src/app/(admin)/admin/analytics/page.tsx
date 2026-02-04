@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AdminHeader } from '@/components/admin';
-import { getMockAnalyticsSummary } from '@/lib/analytics';
+import { getAnalyticsSummary } from '@/lib/analytics';
 import type { AnalyticsSummary, DeviceType } from '@/types';
 
 type DateRange = '7d' | '30d' | '90d' | '1y';
@@ -11,15 +11,45 @@ export default function AnalyticsPage() {
     const [dateRange, setDateRange] = useState<DateRange>('30d');
     const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const loadAnalytics = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Calculate date range
+            const endDate = new Date();
+            const startDate = new Date();
+
+            switch (dateRange) {
+                case '7d':
+                    startDate.setDate(endDate.getDate() - 7);
+                    break;
+                case '30d':
+                    startDate.setDate(endDate.getDate() - 30);
+                    break;
+                case '90d':
+                    startDate.setDate(endDate.getDate() - 90);
+                    break;
+                case '1y':
+                    startDate.setFullYear(endDate.getFullYear() - 1);
+                    break;
+            }
+
+            const data = await getAnalyticsSummary(startDate, endDate);
+            setAnalytics(data);
+        } catch (err) {
+            console.error('Failed to load analytics:', err);
+            setError('Failed to load analytics data');
+        } finally {
+            setLoading(false);
+        }
+    }, [dateRange]);
 
     useEffect(() => {
-        setLoading(true);
-        // For now, use mock data. Replace with real data when analytics table is populated
-        setTimeout(() => {
-            setAnalytics(getMockAnalyticsSummary());
-            setLoading(false);
-        }, 500);
-    }, [dateRange]);
+        loadAnalytics();
+    }, [loadAnalytics]);
 
     const formatDuration = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
@@ -43,7 +73,7 @@ export default function AnalyticsPage() {
         }
     };
 
-    if (loading || !analytics) {
+    if (loading) {
         return (
             <>
                 <AdminHeader
@@ -72,6 +102,83 @@ export default function AnalyticsPage() {
                         to { transform: rotate(360deg); }
                     }
                 `}</style>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <AdminHeader
+                    title="Analytics"
+                    subtitle="Error loading data"
+                />
+                <div className="admin-content">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '300px',
+                        gap: '1rem'
+                    }}>
+                        <div style={{ fontSize: '3rem' }}>⚠️</div>
+                        <div style={{ color: 'var(--color-foreground-muted)' }}>{error}</div>
+                        <button
+                            onClick={loadAnalytics}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'var(--color-accent-solid)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    if (!analytics) {
+        return null;
+    }
+
+    // Check if we have any data
+    const hasData = analytics.totalViews > 0;
+
+    if (!hasData) {
+        return (
+            <>
+                <AdminHeader
+                    title="Analytics"
+                    subtitle="No data yet"
+                />
+                <div className="admin-content">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '400px',
+                        gap: '1.5rem',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ fontSize: '4rem' }}>📊</div>
+                        <div>
+                            <h2 style={{ marginBottom: '0.5rem', color: 'var(--color-foreground)' }}>
+                                No Analytics Data Yet
+                            </h2>
+                            <p style={{ color: 'var(--color-foreground-muted)', maxWidth: '400px' }}>
+                                Analytics will appear here once your site receives traffic.
+                                Make sure the tracking script is installed on your pages.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </>
         );
     }

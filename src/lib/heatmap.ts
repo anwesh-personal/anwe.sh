@@ -211,6 +211,9 @@ export async function getSessions(options: {
     return data as Session[];
 }
 
+/**
+ * Get session statistics from API
+ */
 export async function getSessionStats(days: number = 30): Promise<{
     totalSessions: number;
     uniqueVisitors: number;
@@ -220,15 +223,16 @@ export async function getSessionStats(days: number = 30): Promise<{
     conversionRate: number;
     deviceBreakdown: Record<string, number>;
 }> {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    try {
+        const response = await fetch(`/api/heatmaps?action=stats&days=${days}`);
 
-    const { data: sessions, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .gte('started_at', startDate.toISOString());
+        if (!response.ok) {
+            throw new Error('Failed to fetch session stats');
+        }
 
-    if (error || !sessions) {
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching session stats:', error);
         return {
             totalSessions: 0,
             uniqueVisitors: 0,
@@ -239,25 +243,6 @@ export async function getSessionStats(days: number = 30): Promise<{
             deviceBreakdown: {}
         };
     }
-
-    const uniqueVisitors = new Set(sessions.map(s => s.visitor_id)).size;
-    const bounces = sessions.filter(s => s.page_count <= 1).length;
-    const conversions = sessions.filter(s => s.converted).length;
-
-    const deviceBreakdown: Record<string, number> = {};
-    sessions.forEach(s => {
-        deviceBreakdown[s.device_type] = (deviceBreakdown[s.device_type] || 0) + 1;
-    });
-
-    return {
-        totalSessions: sessions.length,
-        uniqueVisitors,
-        avgDuration: sessions.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) / sessions.length || 0,
-        avgPageViews: sessions.reduce((sum, s) => sum + s.page_count, 0) / sessions.length || 0,
-        bounceRate: (bounces / sessions.length) * 100 || 0,
-        conversionRate: (conversions / sessions.length) * 100 || 0,
-        deviceBreakdown
-    };
 }
 
 // ============================================
@@ -302,6 +287,9 @@ export async function trackEvent(event: {
     }]);
 }
 
+/**
+ * Get heatmap click/move data from API
+ */
 export async function getHeatmapData(
     pagePath: string,
     eventType: 'click' | 'move' | 'scroll' = 'click',
@@ -311,98 +299,78 @@ export async function getHeatmapData(
         deviceType?: 'desktop' | 'tablet' | 'mobile';
     } = {}
 ): Promise<{ x: number; y: number; count: number }[]> {
-    const { startDate, endDate, deviceType } = options;
+    try {
+        const params = new URLSearchParams({
+            action: 'data',
+            pagePath,
+            eventType
+        });
 
-    let query = supabase
-        .from('heatmap_events')
-        .select('x, y')
-        .eq('page_path', pagePath)
-        .eq('event_type', eventType)
-        .not('x', 'is', null)
-        .not('y', 'is', null);
+        if (options.startDate) {
+            params.set('startDate', options.startDate.toISOString());
+        }
+        if (options.endDate) {
+            params.set('endDate', options.endDate.toISOString());
+        }
+        if (options.deviceType) {
+            params.set('deviceType', options.deviceType);
+        }
 
-    if (startDate) {
-        query = query.gte('created_at', startDate.toISOString());
-    }
-    if (endDate) {
-        query = query.lte('created_at', endDate.toISOString());
-    }
-    if (deviceType) {
-        query = query.eq('device_type', deviceType);
-    }
+        const response = await fetch(`/api/heatmaps?${params}`);
 
-    const { data, error } = await query.limit(10000);
+        if (!response.ok) {
+            throw new Error('Failed to fetch heatmap data');
+        }
 
-    if (error || !data) {
+        const json = await response.json();
+        return json.heatmapData || [];
+    } catch (error) {
         console.error('Error fetching heatmap data:', error);
         return [];
     }
-
-    // Aggregate into grid (normalize to 0-100 coordinates)
-    const grid: Record<string, number> = {};
-    data.forEach(point => {
-        const normX = Math.round((point.x / 1920) * 100); // Normalize to 100-unit grid
-        const normY = Math.round((point.y / 1080) * 100);
-        const key = `${normX},${normY}`;
-        grid[key] = (grid[key] || 0) + 1;
-    });
-
-    return Object.entries(grid).map(([key, count]) => {
-        const [x, y] = key.split(',').map(Number);
-        return { x, y, count };
-    });
 }
 
+/**
+ * Get scroll depth data from API
+ */
 export async function getScrollDepthData(
     pagePath: string,
     options: { startDate?: Date; endDate?: Date } = {}
 ): Promise<{ depth: number; sessions: number }[]> {
-    const { startDate, endDate } = options;
+    try {
+        const params = new URLSearchParams({
+            action: 'scroll',
+            pagePath
+        });
 
-    let query = supabase
-        .from('heatmap_events')
-        .select('scroll_depth, session_id')
-        .eq('page_path', pagePath)
-        .eq('event_type', 'scroll')
-        .not('scroll_depth', 'is', null);
+        if (options.startDate) {
+            params.set('startDate', options.startDate.toISOString());
+        }
+        if (options.endDate) {
+            params.set('endDate', options.endDate.toISOString());
+        }
 
-    if (startDate) {
-        query = query.gte('created_at', startDate.toISOString());
-    }
-    if (endDate) {
-        query = query.lte('created_at', endDate.toISOString());
-    }
+        const response = await fetch(`/api/heatmaps?${params}`);
 
-    const { data, error } = await query.limit(10000);
+        if (!response.ok) {
+            throw new Error('Failed to fetch scroll depth data');
+        }
 
-    if (error || !data) {
+        const json = await response.json();
+        return json.scrollData || [];
+    } catch (error) {
+        console.error('Error fetching scroll depth data:', error);
         return [];
     }
-
-    // Get max scroll depth per session
-    const sessionMaxDepth: Record<string, number> = {};
-    data.forEach(row => {
-        if (!sessionMaxDepth[row.session_id] || row.scroll_depth > sessionMaxDepth[row.session_id]) {
-            sessionMaxDepth[row.session_id] = row.scroll_depth;
-        }
-    });
-
-    // Bucket into 10% increments
-    const buckets: Record<number, number> = {};
-    Object.values(sessionMaxDepth).forEach(depth => {
-        const bucket = Math.floor(depth / 10) * 10;
-        buckets[bucket] = (buckets[bucket] || 0) + 1;
-    });
-
-    return Object.entries(buckets)
-        .map(([depth, sessions]) => ({ depth: Number(depth), sessions }))
-        .sort((a, b) => a.depth - b.depth);
 }
 
 // ============================================
 // LEADS
 // ============================================
 
+/**
+ * Create a new lead via API
+ */
 export async function createLead(data: {
     sessionId?: string;
     email?: string;
@@ -417,33 +385,28 @@ export async function createLead(data: {
     utmCampaign?: string;
     metadata?: Record<string, unknown>;
 }): Promise<Lead | null> {
-    const { data: lead, error } = await supabase
-        .from('leads')
-        .insert([{
-            session_id: data.sessionId,
-            email: data.email,
-            name: data.name,
-            company: data.company,
-            phone: data.phone,
-            source: data.source || 'website',
-            source_page: data.sourcePage,
-            referrer: data.referrer,
-            utm_source: data.utmSource,
-            utm_medium: data.utmMedium,
-            utm_campaign: data.utmCampaign,
-            metadata: data.metadata || {}
-        }])
-        .select()
-        .single();
+    try {
+        const response = await fetch('/api/leads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-    if (error) {
+        if (!response.ok) {
+            throw new Error('Failed to create lead');
+        }
+
+        const json = await response.json();
+        return json.lead as Lead;
+    } catch (error) {
         console.error('Error creating lead:', error);
         return null;
     }
-
-    return lead as Lead;
 }
 
+/**
+ * Get leads from API with filtering
+ */
 export async function getLeads(options: {
     limit?: number;
     offset?: number;
@@ -451,53 +414,60 @@ export async function getLeads(options: {
     classification?: string;
     minScore?: number;
 }): Promise<Lead[]> {
-    const { limit = 50, offset = 0, status, classification, minScore } = options;
+    try {
+        const { limit = 50, offset = 0, status, classification } = options;
 
-    let query = supabase
-        .from('leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        const params = new URLSearchParams({
+            limit: limit.toString(),
+            offset: offset.toString()
+        });
 
-    if (status) {
-        query = query.eq('status', status);
-    }
-    if (classification) {
-        query = query.eq('ai_classification', classification);
-    }
-    if (minScore !== undefined) {
-        query = query.gte('ai_score', minScore);
-    }
+        if (status) params.set('status', status);
+        if (classification) params.set('classification', classification);
 
-    const { data, error } = await query;
+        const response = await fetch(`/api/leads?${params}`);
 
-    if (error) {
+        if (!response.ok) {
+            throw new Error('Failed to fetch leads');
+        }
+
+        const json = await response.json();
+        return json.leads as Lead[];
+    } catch (error) {
         console.error('Error fetching leads:', error);
         return [];
     }
-
-    return data as Lead[];
 }
 
+/**
+ * Update a lead via API
+ */
 export async function updateLead(
     leadId: string,
     updates: Partial<Lead>
 ): Promise<Lead | null> {
-    const { data, error } = await supabase
-        .from('leads')
-        .update(updates)
-        .eq('id', leadId)
-        .select()
-        .single();
+    try {
+        const response = await fetch('/api/leads', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: leadId, ...updates })
+        });
 
-    if (error) {
+        if (!response.ok) {
+            throw new Error('Failed to update lead');
+        }
+
+        const json = await response.json();
+        return json.lead as Lead;
+    } catch (error) {
         console.error('Error updating lead:', error);
         return null;
     }
-
-    return data as Lead;
 }
 
+/**
+ * Get lead statistics from API
+ */
 export async function getLeadStats(): Promise<{
     total: number;
     new: number;
@@ -507,23 +477,17 @@ export async function getLeadStats(): Promise<{
     converted: number;
     avgScore: number;
 }> {
-    const { data: leads, error } = await supabase
-        .from('leads')
-        .select('status, ai_classification, ai_score');
+    try {
+        const response = await fetch('/api/leads?action=stats');
 
-    if (error || !leads) {
+        if (!response.ok) {
+            throw new Error('Failed to fetch lead stats');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching lead stats:', error);
         return { total: 0, new: 0, hot: 0, warm: 0, cold: 0, converted: 0, avgScore: 0 };
     }
-
-    const scores = leads.filter(l => l.ai_score !== null).map(l => l.ai_score);
-
-    return {
-        total: leads.length,
-        new: leads.filter(l => l.status === 'new').length,
-        hot: leads.filter(l => l.ai_classification === 'hot').length,
-        warm: leads.filter(l => l.ai_classification === 'warm').length,
-        cold: leads.filter(l => l.ai_classification === 'cold').length,
-        converted: leads.filter(l => l.status === 'converted').length,
-        avgScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
-    };
 }
+
