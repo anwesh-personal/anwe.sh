@@ -145,9 +145,14 @@ export default async function PostsPage() {
                                                 <Link href={`/admin/posts/${post.id}`} className="btn btn-ghost btn-sm">
                                                     Edit
                                                 </Link>
-                                                <Link href={`/blog/${post.slug}`} target="_blank" className="btn btn-ghost btn-sm">
+                                                <a
+                                                    href={`https://anwe.sh/blog/${post.slug}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-ghost btn-sm"
+                                                >
                                                     View
-                                                </Link>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
