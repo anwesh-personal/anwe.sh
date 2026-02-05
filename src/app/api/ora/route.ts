@@ -6,6 +6,8 @@
  * 
  * GET - Returns API schema for autodiscovery (no auth required)
  * POST - Execute actions (auth required)
+ * 
+ * Last updated: 2026-02-05T05:50:00Z
  */
 
 import { NextRequest, NextResponse } from 'next/server';
