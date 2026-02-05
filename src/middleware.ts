@@ -65,8 +65,10 @@ export async function middleware(request: NextRequest) {
         }
 
         // Block marketing pages on app subdomain
+        // But don't redirect RSC prefetch requests (they have _rsc param) - causes CORS errors
         const marketingPages = ['/blog', '/docs', '/about', '/contact'];
-        if (marketingPages.some(page => pathname.startsWith(page))) {
+        const isRscPrefetch = searchParams.has('_rsc');
+        if (marketingPages.some(page => pathname.startsWith(page)) && !isRscPrefetch) {
             const mainUrl = new URL(pathname, 'https://anwe.sh');
             return NextResponse.redirect(mainUrl);
         }
