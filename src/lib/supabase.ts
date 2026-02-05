@@ -196,13 +196,25 @@ export async function getFeaturedPosts(): Promise<BlogPost[]> {
 // ADMIN FUNCTIONS (require auth) - Use service role to bypass RLS
 // =====================================================
 
-// Server-side admin client (bypasses RLS)
+// Check if we're running on server
+const isServer = typeof window === 'undefined';
+
+// Server-side admin client (bypasses RLS) - only works on server
 function getAdminClient(): SupabaseClient {
+    if (!isServer) {
+        throw new Error('getAdminClient can only be called on server');
+    }
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceKey) {
         throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
     }
     return createClient(supabaseUrl, serviceKey);
+}
+
+// Get base URL for API calls from client
+function getBaseUrl(): string {
+    if (isServer) return '';
+    return window.location.origin;
 }
 
 // Get ALL posts (including drafts) for admin
@@ -227,17 +239,25 @@ export async function getAllPostsAdmin(): Promise<BlogPost[]> {
 // Get a single post by ID (for editing)
 export async function getPostById(id: string): Promise<BlogPost | null> {
     try {
-        const { data, error } = await getAdminClient()
-            .from('blog_posts')
-            .select('*')
-            .eq('id', id)
-            .single();
+        if (isServer) {
+            // Server: use direct Supabase
+            const { data, error } = await getAdminClient()
+                .from('blog_posts')
+                .select('*')
+                .eq('id', id)
+                .single();
 
-        if (error) {
-            console.error('Error fetching post:', error);
-            return null;
+            if (error) {
+                console.error('Error fetching post:', error);
+                return null;
+            }
+            return data;
+        } else {
+            // Client: use API
+            const response = await fetch(`${getBaseUrl()}/api/posts?id=${id}`);
+            const json = await response.json();
+            return json.post || null;
         }
-        return data;
     } catch (error) {
         console.error('Error fetching post by ID:', error);
         return null;
@@ -247,29 +267,39 @@ export async function getPostById(id: string): Promise<BlogPost | null> {
 // Create a new post
 export async function createPost(post: Partial<BlogPost>): Promise<BlogPost | null> {
     try {
-        const { data, error } = await getAdminClient()
-            .from('blog_posts')
-            .insert({
-                title: post.title,
-                slug: post.slug || post.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-                content: post.content,
-                excerpt: post.excerpt,
-                category: post.category || 'General',
-                cover_image: post.cover_image,
-                meta_title: post.meta_title,
-                meta_description: post.meta_description,
-                reading_time: post.reading_time,
-                published: post.published || false,
-                published_at: post.published ? new Date().toISOString() : null,
-            })
-            .select()
-            .single();
+        if (isServer) {
+            const { data, error } = await getAdminClient()
+                .from('blog_posts')
+                .insert({
+                    title: post.title,
+                    slug: post.slug || post.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                    content: post.content,
+                    excerpt: post.excerpt,
+                    category: post.category || 'General',
+                    cover_image: post.cover_image,
+                    meta_title: post.meta_title,
+                    meta_description: post.meta_description,
+                    reading_time: post.reading_time,
+                    published: post.published || false,
+                    published_at: post.published ? new Date().toISOString() : null,
+                })
+                .select()
+                .single();
 
-        if (error) {
-            console.error('Error creating post:', error);
-            return null;
+            if (error) {
+                console.error('Error creating post:', error);
+                return null;
+            }
+            return data;
+        } else {
+            const response = await fetch(`${getBaseUrl()}/api/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(post)
+            });
+            const json = await response.json();
+            return json.post || null;
         }
-        return data;
     } catch (error) {
         console.error('Error creating post:', error);
         return null;
@@ -279,21 +309,31 @@ export async function createPost(post: Partial<BlogPost>): Promise<BlogPost | nu
 // Update a post
 export async function updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
     try {
-        const { data, error } = await getAdminClient()
-            .from('blog_posts')
-            .update({
-                ...updates,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', id)
-            .select()
-            .single();
+        if (isServer) {
+            const { data, error } = await getAdminClient()
+                .from('blog_posts')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id)
+                .select()
+                .single();
 
-        if (error) {
-            console.error('Error updating post:', error);
-            return null;
+            if (error) {
+                console.error('Error updating post:', error);
+                return null;
+            }
+            return data;
+        } else {
+            const response = await fetch(`${getBaseUrl()}/api/posts`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...updates })
+            });
+            const json = await response.json();
+            return json.post || null;
         }
-        return data;
     } catch (error) {
         console.error('Error updating post:', error);
         return null;
@@ -303,16 +343,22 @@ export async function updatePost(id: string, updates: Partial<BlogPost>): Promis
 // Delete a post
 export async function deletePost(id: string): Promise<boolean> {
     try {
-        const { error } = await getAdminClient()
-            .from('blog_posts')
-            .delete()
-            .eq('id', id);
+        if (isServer) {
+            const { error } = await getAdminClient()
+                .from('blog_posts')
+                .delete()
+                .eq('id', id);
 
-        if (error) {
-            console.error('Error deleting post:', error);
-            return false;
+            if (error) {
+                console.error('Error deleting post:', error);
+                return false;
+            }
+            return true;
+        } else {
+            const response = await fetch(`${getBaseUrl()}/api/posts?id=${id}`, { method: 'DELETE' });
+            const json = await response.json();
+            return json.success || false;
         }
-        return true;
     } catch (error) {
         console.error('Error deleting post:', error);
         return false;
