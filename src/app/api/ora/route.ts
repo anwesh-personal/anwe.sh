@@ -445,6 +445,7 @@ async function publishPost(data: { id: string }) {
         .from('blog_posts')
         .update({
             status: 'published',
+            published: true,  // Also set boolean for RLS/public queries
             published_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         })
