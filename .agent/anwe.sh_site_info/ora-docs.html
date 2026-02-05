@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORA Documentation - Complete Guide</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --aqua-400: #22d3ee;
+            --aqua-500: #06b6d4;
+            --aqua-600: #0891b2;
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #0d1525;
+            --bg-tertiary: #111b2e;
+            --bg-card: rgba(13, 21, 37, 0.9);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(6, 182, 212, 0.15);
+            --glow: 0 0 40px rgba(6, 182, 212, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* Layout */
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--aqua-400), var(--aqua-600));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--bg-primary);
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-section {
+            padding: 1rem 0;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(6, 182, 212, 0.05);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--aqua-400);
+            border-left-color: var(--aqua-400);
+        }
+
+        .nav-item-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .content-header {
+            padding: 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .content-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .content-header p {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .content-body {
+            padding: 2rem 3rem;
+            max-width: 1000px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Markdown Styles */
+        .md-content h1 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .md-content h2 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--aqua-400);
+        }
+
+        .md-content h3 {
+            font-size: 1.25rem;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        .md-content p {
+            margin: 1rem 0;
+            color: var(--text-secondary);
+        }
+
+        .md-content ul,
+        .md-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .md-content li {
+            margin: 0.5rem 0;
+        }
+
+        .md-content code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .md-content pre {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .md-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .md-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .md-content th,
+        .md-content td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .md-content th {
+            background: var(--bg-tertiary);
+            color: var(--aqua-400);
+        }
+
+        .md-content blockquote {
+            border-left: 4px solid var(--aqua-500);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--text-muted);
+        }
+
+        .md-content a {
+            color: var(--aqua-400);
+            text-decoration: none;
+        }
+
+        .md-content a:hover {
+            text-decoration: underline;
+        }
+
+        .md-content hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--aqua-500);
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quick Stats */
+        .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), transparent);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.75rem;
+            min-width: 140px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--aqua-400), var(--aqua-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Search */
+        .search-box {
+            padding: 0.75rem 1rem;
+            margin: 1rem 1.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .content-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">O</div>
+                <span class="sidebar-title">ORA Docs</span>
+            </div>
+
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" placeholder="Search docs..." id="searchInput">
+            </div>
+
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a class="nav-item active" data-tab="home"><span class="nav-item-icon">🏠</span> Home</a>
+                    <a class="nav-item" data-tab="reality"><span class="nav-item-icon">⚠️</span> Reality Check</a>
+                    <a class="nav-item" data-tab="architecture"><span class="nav-item-icon">🏗️</span> Architecture</a>
+                    <a class="nav-item" data-tab="arch-options"><span class="nav-item-icon">⚖️</span> DB Options</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Technical</div>
+                    <a class="nav-item" data-tab="data-models"><span class="nav-item-icon">📦</span> Data Models</a>
+                    <a class="nav-item" data-tab="database"><span class="nav-item-icon">🗄️</span> Database Schema</a>
+                    <a class="nav-item" data-tab="api"><span class="nav-item-icon">🔌</span> API Schema</a>
+                    <a class="nav-item" data-tab="services"><span class="nav-item-icon">⚙️</span> Services</a>
+                    <a class="nav-item" data-tab="tools"><span class="nav-item-icon">🔧</span> MCP Tools</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Integrations</div>
+                    <a class="nav-item" data-tab="cursor"><span class="nav-item-icon">⚡</span> Cursor Integration</a>
+                    <a class="nav-item" data-tab="sdk"><span class="nav-item-icon">📚</span> Oraya SDK</a>
+                    <a class="nav-item" data-tab="flows"><span class="nav-item-icon">🔄</span> User Flows</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Design</div>
+                    <a class="nav-item" data-tab="ui"><span class="nav-item-icon">🎨</span> UI Design</a>
+                    <a class="nav-item" data-tab="checklist"><span class="nav-item-icon">✅</span> Checklist</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Plans</div>
+                    <a class="nav-item" data-tab="ora-plan"><span class="nav-item-icon">📋</span> ORA Agent System</a>
+                    <a class="nav-item" data-tab="admin-plan"><span class="nav-item-icon">👤</span> Admin Panel</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="content-header" id="contentHeader">
+                <h1><span id="headerIcon">🏠</span> <span id="headerTitle">Home</span></h1>
+                <p id="headerDesc">Welcome to ORA Documentation</p>
+            </div>
+
+            <div class="content-body">
+                <!-- Home Tab -->
+                <div class="tab-content active" id="tab-home">
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <div class="stat-value">13</div>
+                            <div class="stat-label">Doc Files</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">∞</div>
+                            <div class="stat-label">Connections</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">6</div>
+                            <div class="stat-label">IDEs Supported</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Protocol</div>
+                        </div>
+                    </div>
+
+                    <h2 style="color: var(--aqua-400); margin: 2rem 0 1rem;">What is ORA?</h2>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.8;">
+                        ORA (Oraya) is a <strong style="color: var(--text-primary);">universal AI controller</strong>
+                        that connects to websites, IDEs, and tools through a unified protocol.
+                        One brain, many hands - control everything from one place.
+                    </p>
+
+                    <div class="card-grid">
+                        <div class="card">
+                            <div class="card-icon">🌐</div>
+                            <h3>Site Connections</h3>
+                            <p>Connect to unlimited websites. Manage content, leads, settings remotely.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">💻</div>
+                            <h3>IDE Integration</h3>
+                            <p>Control Cursor, VS Code, Antigravity, JetBrains - through natural language.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🧠</div>
+                            <h3>Persistent Memory</h3>
+                            <p>Site-specific memories that persist. ORA remembers context and preferences.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🤖</div>
+                            <h3>Agent Spawning</h3>
+                            <p>Delegate tasks to specialized agents - writers, researchers, analysts.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔌</div>
+                            <h3>Oraya SDK</h3>
+                            <p>Universal protocol. Any system that implements it can connect to ORA.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔒</div>
+                            <h3>Secure by Design</h3>
+                            <p>Encrypted secrets, per-site isolation, flexible storage options.</p>
+                        </div>
+                    </div>
+
+                    <h2 style="color: var(--aqua-400); margin: 2rem 0 1rem;">Quick Navigation</h2>
+                    <p style="color: var(--text-secondary);">Use the sidebar to explore different sections of the
+                        documentation.</p>
+                </div>
+
+                <!-- Dynamic content tabs - loaded from MD files -->
+                <div class="tab-content" id="tab-reality">
+                    <div class="md-content" id="md-reality">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-architecture">
+                    <div class="md-content" id="md-architecture">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-arch-options">
+                    <div class="md-content" id="md-arch-options">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-data-models">
+                    <div class="md-content" id="md-data-models">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-database">
+                    <div class="md-content" id="md-database">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-api">
+                    <div class="md-content" id="md-api">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-services">
+                    <div class="md-content" id="md-services">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-tools">
+                    <div class="md-content" id="md-tools">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-cursor">
+                    <div class="md-content" id="md-cursor">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-sdk">
+                    <div class="md-content" id="md-sdk">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-flows">
+                    <div class="md-content" id="md-flows">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-ui">
+                    <div class="md-content" id="md-ui">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-checklist">
+                    <div class="md-content" id="md-checklist">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-ora-plan">
+                    <div class="md-content" id="md-ora-plan">Loading...</div>
+                </div>
+                <div class="tab-content" id="tab-admin-plan">
+                    <div class="md-content" id="md-admin-plan">Loading...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Tab metadata
+        const tabMeta = {
+            'home': { icon: '🏠', title: 'Home', desc: 'Welcome to ORA Documentation' },
+            'reality': { icon: '⚠️', title: 'Reality Check', desc: 'What exists vs what needs to be built', file: 'CONNECTION_REALITY.md' },
+            'architecture': { icon: '🏗️', title: 'Architecture', desc: 'System architecture and component diagrams', file: 'ARCHITECTURE.md' },
+            'arch-options': { icon: '⚖️', title: 'Database Options', desc: 'Local vs Centralized storage decision', file: 'ARCHITECTURE_OPTIONS.md' },
+            'data-models': { icon: '📦', title: 'Data Models', desc: 'TypeScript interfaces and types', file: 'DATA_MODELS.md' },
+            'database': { icon: '🗄️', title: 'Database Schema', desc: 'SQLite schema for .site.db files', file: 'DATABASE_SCHEMA.md' },
+            'api': { icon: '🔌', title: 'API Schema', desc: 'ORA API specification for websites', file: 'API_SCHEMA.md' },
+            'services': { icon: '⚙️', title: 'Services', desc: 'Core service implementations', file: 'SERVICES.md' },
+            'tools': { icon: '🔧', title: 'MCP Tools', desc: 'Tool definitions for sites and memory', file: 'TOOLS.md' },
+            'cursor': { icon: '⚡', title: 'Cursor Integration', desc: 'Complete guide to ORA + Cursor IDE', file: 'CURSOR_INTEGRATION.md' },
+            'sdk': { icon: '📚', title: 'Oraya SDK', desc: 'IDE connection guides - Cursor, Antigravity, etc.', file: 'SDK_OVERVIEW.md' },
+            'flows': { icon: '🔄', title: 'User Flows', desc: 'Step-by-step user interaction flows', file: 'FLOWS.md' },
+            'ui': { icon: '🎨', title: 'UI Design', desc: 'Settings UI mockups and component specs', file: 'UI_DESIGN.md' },
+            'checklist': { icon: '✅', title: 'Checklist', desc: 'Implementation progress tracker', file: 'CHECKLIST.md' },
+            'ora-plan': { icon: '📋', title: 'ORA Agent System', desc: 'Complete ORA system plan', file: '../plans/active/ORA-AGENT-SYSTEM.md' },
+            'admin-plan': { icon: '👤', title: 'Admin Panel', desc: 'Admin panel build plan', file: '../plans/active/ADMIN-FULL-BUILD.md' }
+        };
+
+        // Cache for loaded content
+        const contentCache = {};
+
+        // Tab switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', async () => {
+                const tab = item.dataset.tab;
+
+                // Update active nav
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // Update header
+                const meta = tabMeta[tab];
+                document.getElementById('headerIcon').textContent = meta.icon;
+                document.getElementById('headerTitle').textContent = meta.title;
+                document.getElementById('headerDesc').textContent = meta.desc;
+
+                // Show tab
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+
+                // Load MD content if needed
+                if (meta.file && !contentCache[tab]) {
+                    try {
+                        const resp = await fetch(meta.file);
+                        const md = await resp.text();
+                        contentCache[tab] = marked.parse(md);
+                        document.getElementById(`md-${tab}`).innerHTML = contentCache[tab];
+                        hljs.highlightAll();
+                    } catch (e) {
+                        document.getElementById(`md-${tab}`).innerHTML = `<p style="color: #ef4444;">Error loading ${meta.file}: ${e.message}</p>`;
+                    }
+                }
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+
+</html>

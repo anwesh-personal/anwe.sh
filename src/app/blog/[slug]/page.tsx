@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { getAllPosts, getPostBySlug } from '@/lib/supabase';
 import { Navigation } from '@/components/marketing/Navigation';
 import { Footer } from '@/components/marketing/Footer';
+import { marked } from 'marked';
+
+// Configure marked for safe, consistent output
+marked.setOptions({
+    gfm: true,        // GitHub Flavored Markdown
+    breaks: true,     // Convert \n to <br>
+});
 
 // Force dynamic rendering for theme sync
 export const dynamic = 'force-dynamic';
@@ -60,7 +67,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="post-content">
                     <div
                         className="prose"
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(post.content) }}
+                        dangerouslySetInnerHTML={{ __html: parseContent(post.content) }}
                     />
                 </div>
 
@@ -95,16 +102,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     );
 }
 
-// Simple markdown parser
-function parseMarkdown(content: string): string {
-    return content
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-        .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>')
-        .replace(/^- (.*$)/gim, '<li>$1</li>')
-        .replace(/^---$/gim, '<hr />')
-        .replace(/\n\n/gim, '</p><p>');
+// Parse content - handles both markdown and HTML
+function parseContent(content: string): string {
+    // If content is already HTML (has block-level tags), return as-is
+    // This handles legacy ORA posts that sent HTML
+    if (/<(p|div|h[1-6]|ul|ol|article|section)[\s>]/i.test(content)) {
+        return content;
+    }
+
+    // Otherwise, parse as markdown
+    return marked.parse(content) as string;
 }
