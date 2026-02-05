@@ -43,7 +43,7 @@ export default function OraApiPage() {
     const [error, setError] = useState<string | null>(null);
     const [selectedAction, setSelectedAction] = useState<string | null>(null);
     const [testParams, setTestParams] = useState<Record<string, string>>({});
-    const [testResult, setTestResult] = useState<unknown>(null);
+    const [testResult, setTestResult] = useState<Record<string, unknown> | null>(null);
     const [testing, setTesting] = useState(false);
 
     const fetchSchema = useCallback(async () => {
