@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin';
-import { BlockEditor, blocksToMarkdown, createEmptyBlock } from '@/components/editor';
+import { RichTextEditor } from '@/components/editor';
 import { createPost, generateSlug, calculateReadingTime } from '@/lib/supabase';
-import type { Block } from '@/types';
 
 export default function NewPostPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-    const [blocks, setBlocks] = useState<Block[]>([createEmptyBlock('paragraph')]);
+    const [content, setContent] = useState<string>('');
     const [form, setForm] = useState({
         title: '',
         slug: '',
@@ -31,17 +30,15 @@ export default function NewPostPage() {
         }));
     };
 
-    const handleBlocksChange = useCallback((newBlocks: Block[]) => {
-        setBlocks(newBlocks);
-    }, []);
+    const handleContentChange = (html: string) => {
+        setContent(html);
+    };
 
     const handleSubmit = async (publish: boolean) => {
         if (!form.title) {
             alert('Title is required');
             return;
         }
-
-        const content = blocksToMarkdown(blocks);
 
         if (!content.trim()) {
             alert('Content is required');
@@ -159,7 +156,7 @@ export default function NewPostPage() {
                                         padding: '0.25rem 0.5rem',
                                         borderRadius: 'var(--radius-sm)'
                                     }}>
-                                        {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                                        {content.length} characters
                                     </span>
                                     <button className="btn btn-ghost btn-sm" style={{
                                         background: 'linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end))',
@@ -173,16 +170,16 @@ export default function NewPostPage() {
                             </div>
                             <div className="admin-card-body" style={{ padding: '0 1rem 1rem' }}>
                                 {activeTab === 'editor' ? (
-                                    <BlockEditor
-                                        initialBlocks={blocks}
-                                        onChange={handleBlocksChange}
-                                        placeholder="Start writing your post... Press + to add blocks or just start typing."
+                                    <RichTextEditor
+                                        content={content}
+                                        onChange={handleContentChange}
+                                        placeholder="Start writing your post..."
                                     />
                                 ) : (
-                                    <div className="block-editor block-editor--readonly" style={{ padding: '1rem 0' }}>
-                                        <BlockEditor
-                                            initialBlocks={blocks}
-                                            readOnly
+                                    <div className="rich-editor-preview" style={{ padding: '1rem 0' }}>
+                                        <div
+                                            className="prose"
+                                            dangerouslySetInnerHTML={{ __html: content }}
                                         />
                                     </div>
                                 )}

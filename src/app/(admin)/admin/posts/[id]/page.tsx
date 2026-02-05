@@ -1,11 +1,10 @@
 'use client';
 
-import { use, useState, useEffect, useCallback } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminHeader } from '@/components/admin';
-import { BlockEditor, markdownToBlocks, blocksToMarkdown, createEmptyBlock } from '@/components/editor';
+import { RichTextEditor } from '@/components/editor';
 import { getPostById, updatePost, generateSlug, calculateReadingTime, type BlogPost } from '@/lib/supabase';
-import type { Block } from '@/types';
 
 interface EditPostPageProps {
     params: Promise<{ id: string }>;
@@ -17,7 +16,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-    const [blocks, setBlocks] = useState<Block[]>([createEmptyBlock('paragraph')]);
+    const [content, setContent] = useState<string>('');
     const [post, setPost] = useState<BlogPost | null>(null);
     const [form, setForm] = useState({
         title: '',
@@ -49,10 +48,9 @@ export default function EditPostPage({ params }: EditPostPageProps) {
                 meta_description: data.meta_description || '',
             });
 
-            // Convert markdown content to blocks
+            // Load content directly (HTML or markdown)
             if (data.content) {
-                const parsedBlocks = markdownToBlocks(data.content);
-                setBlocks(parsedBlocks.length > 0 ? parsedBlocks : [createEmptyBlock('paragraph')]);
+                setContent(data.content);
             }
 
             setLoading(false);
@@ -71,17 +69,15 @@ export default function EditPostPage({ params }: EditPostPageProps) {
         }));
     };
 
-    const handleBlocksChange = useCallback((newBlocks: Block[]) => {
-        setBlocks(newBlocks);
-    }, []);
+    const handleContentChange = (html: string) => {
+        setContent(html);
+    };
 
     const handleSubmit = async (publish: boolean) => {
         if (!form.title) {
             alert('Title is required');
             return;
         }
-
-        const content = blocksToMarkdown(blocks);
 
         if (!content.trim()) {
             alert('Content is required');
@@ -233,7 +229,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
                                         padding: '0.25rem 0.5rem',
                                         borderRadius: 'var(--radius-sm)'
                                     }}>
-                                        {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                                        {content.length} characters
                                     </span>
                                     {post?.source === 'ai' && (
                                         <span style={{
@@ -250,16 +246,16 @@ export default function EditPostPage({ params }: EditPostPageProps) {
                             </div>
                             <div className="admin-card-body" style={{ padding: '0 1rem 1rem' }}>
                                 {activeTab === 'editor' ? (
-                                    <BlockEditor
-                                        initialBlocks={blocks}
-                                        onChange={handleBlocksChange}
+                                    <RichTextEditor
+                                        content={content}
+                                        onChange={handleContentChange}
                                         placeholder="Start writing your post..."
                                     />
                                 ) : (
-                                    <div className="block-editor block-editor--readonly" style={{ padding: '1rem 0' }}>
-                                        <BlockEditor
-                                            initialBlocks={blocks}
-                                            readOnly
+                                    <div className="rich-editor-preview" style={{ padding: '1rem 0' }}>
+                                        <div
+                                            className="prose"
+                                            dangerouslySetInnerHTML={{ __html: content }}
                                         />
                                     </div>
                                 )}
