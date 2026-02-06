@@ -34,7 +34,7 @@ const journeyItems = [
         era: 'Author & Consultant',
         title: 'Bestselling Author',
         description: 'Published bestsellers. Consulted for enterprises. Mastered persuasion, sales funnels, and human psychology.',
-        image: '/journey-4.jpg',
+        image: '/images/anwesh-author.jpg',
     },
     {
         year: 'Now',
