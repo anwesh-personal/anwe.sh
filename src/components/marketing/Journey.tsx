@@ -27,7 +27,7 @@ const journeyItems = [
         era: 'Family & Founder',
         title: 'Family & Ventures',
         description: 'Became a father. Started companies. The most complex systems to build are human ones.',
-        image: '/journey-3.jpg',
+        image: '/images/anwesh-family.jpg',
     },
     {
         year: '2016-20',
